@@ -35,11 +35,18 @@ public class UnitSelector : Singleton<UnitSelector>
             {
                 if (SelectedGO != null)
                 {
+                    if (SelectedGO == hit.collider.gameObject)
+                    {
+                        return;
+                    }
+
                     SelectedGO.transform.GetChild(0).gameObject.SetActive(false);
+                    SelectedGO.GetComponent<Unit>()._deselectAction?.Invoke();
                 }
 
                 SelectedGO = hit.collider.gameObject;
                 SelectedGO.transform.GetChild(0).gameObject.SetActive(true);
+                SelectedGO.GetComponent<Unit>()._selectAction?.Invoke();
             }
         }
     }

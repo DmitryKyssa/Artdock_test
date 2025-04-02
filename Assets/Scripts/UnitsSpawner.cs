@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class UnitsSpawner : Singleton<UnitsSpawner>
@@ -14,12 +15,18 @@ public class UnitsSpawner : Singleton<UnitsSpawner>
     [SerializeField] private Color _firstTeamColor;
     [SerializeField] private LayerMask _firstTeamLayer;
     [SerializeField] private Transform _firstTeamParent;
+    public List<Unit> FirstTeamUnits { get; private set; } = new List<Unit>();
+    private const string _firstTeamUnitName = "FirstTeamUnit_";
 
     [Header("Second team")]
     [SerializeField] private int _secondTeamUnitsCount;
     [SerializeField] private Color _secondTeamColor;
     [SerializeField] private LayerMask _secondTeamLayer;
     [SerializeField] private Transform _secondTeamParent;
+    public List<Unit> SecondTeamUnits { get; private set; } = new List<Unit>();
+    private const string _secondTeamUnitName = "SecondTeamUnit_";
+
+    public Vector3 SpawnAreaSize => _spawnAreaSize;
 
     public override void Awake()
     {
@@ -35,12 +42,14 @@ public class UnitsSpawner : Singleton<UnitsSpawner>
         for (int i = 0; i < _firstTeamUnitsCount; i++)
         {
             SpawnUnit(_firstTeamColor, layer, _firstTeamParent);
+            FirstTeamUnits.Add(_unitPrefab);
         }
 
         layer = (int)Mathf.Log(_secondTeamLayer.value, 2);
         for (int i = 0; i < _secondTeamUnitsCount; i++)
         {
             SpawnUnit(_secondTeamColor, layer, _secondTeamParent);
+            SecondTeamUnits.Add(_unitPrefab);
         }
     }
 
@@ -49,6 +58,9 @@ public class UnitsSpawner : Singleton<UnitsSpawner>
         Unit unit = Instantiate(_unitPrefab, GetRandomPosition(), Quaternion.identity, parent);
         unit.SetColor(color);
         unit.SetLayer(layer);
+        unit.name = parent == _firstTeamParent 
+            ? _firstTeamUnitName + FirstTeamUnits.Count 
+            : _secondTeamUnitName + SecondTeamUnits.Count;
     }
 
     private Vector3 GetRandomPosition()
