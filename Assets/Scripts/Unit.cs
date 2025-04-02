@@ -11,7 +11,16 @@ public class Unit : MonoBehaviour
     private readonly Vector3[] _directions = { Vector3.forward, Vector3.back, Vector3.left, Vector3.right };
     [SerializeField] private float _moveDelay = 1f;
     [SerializeField] private float _moveDuration = 1f;
+    [SerializeField] private int _XP;
+    private int _HP;
+    [SerializeField] private int _maxHP = 100;
+    [SerializeField] private int _damage;
+    private int _stamina;
+    [SerializeField] private int _maxStamina = 100;
+    [SerializeField] private int _restoreStaminaValue = 1;
+    [SerializeField] private int _restoreStaminaDelay = 1;
     private InputAction _moveSelectedAction;
+    private Coroutine _restoreStaminaCoroutine;
 
     private void Awake()
     {
@@ -31,6 +40,9 @@ public class Unit : MonoBehaviour
     private void Start()
     {
         _deselectAction?.Invoke();
+        _HP = _maxHP;
+        _stamina = _maxStamina = 100; //why _maxStamina == 0?
+        //Debug.Log($"HP: {_HP}/{_maxHP}, stamina: {_stamina}/{_maxStamina} for GO {gameObject.name}");
     }
 
     private void OnDestroy()
@@ -61,6 +73,7 @@ public class Unit : MonoBehaviour
         float clampedZ = Mathf.Clamp(targetPosition.z, -UnitsSpawner.Instance.SpawnAreaSize.z, UnitsSpawner.Instance.SpawnAreaSize.z);
         targetPosition = new Vector3(clampedX, transform.position.y, clampedZ);
         transform.position = targetPosition;
+        SpendStamina(10); //test stamina
     }
 
     private IEnumerator MoveUnselected()
@@ -92,5 +105,54 @@ public class Unit : MonoBehaviour
     public void SetLayer(int layer)
     {
         gameObject.layer = layer;
+    }
+
+    public void AddXP(int value)
+    {
+        _XP += value;
+        //TODO: Add logic for leveling up => adding new abilities
+    }
+
+    public void TakeDamage(int value)
+    {
+        _HP = Mathf.Clamp(_HP - value, 0, _maxHP);
+        if (_HP == 0)
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    public void DealDamage(Unit unit)
+    {
+        unit.TakeDamage(_damage);
+    }
+
+    public void RestoreStamina(int value)
+    {
+        _stamina = Mathf.Clamp(_stamina + value, 0, _maxStamina);
+    }
+
+    private IEnumerator RestoreStaminaPeriodically()
+    {
+        while (_stamina < _maxStamina)
+        {
+            RestoreStamina(_restoreStaminaValue);
+            //Debug.Log($"Restoring stamina: {_stamina}/{_maxStamina} for GO {gameObject.name}");
+            yield return new WaitForSeconds(_restoreStaminaDelay);
+        }
+
+        _restoreStaminaCoroutine = null;
+    }
+
+    public void SpendStamina(int value)
+    {
+        _stamina = Mathf.Clamp(_stamina - value, 0, _maxStamina);
+
+        _restoreStaminaCoroutine ??= StartCoroutine(RestoreStaminaPeriodically());
+    }
+
+    public void Heal(int value)
+    {
+        _HP = Mathf.Clamp(_HP + value, 0, _maxHP);
     }
 }
