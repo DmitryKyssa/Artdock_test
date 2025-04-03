@@ -9,7 +9,7 @@ public class AbilityEditor : EditorWindow
 
     [Header("Editing existing ability")]
     private string _newAbilityName = "New Ability";
-    private Ability _selectedAbility;
+    private AbilityData _selectedAbility;
 
     [MenuItem("Window/Ability Editor")]
     public static void ShowWindow()
@@ -39,7 +39,7 @@ public class AbilityEditor : EditorWindow
     {
         GUILayout.Label("Edit an existing Ability", EditorStyles.boldLabel);
 
-        _selectedAbility = (Ability)EditorGUILayout.ObjectField("Ability", _selectedAbility, typeof(Ability), false);
+        _selectedAbility = (AbilityData)EditorGUILayout.ObjectField("Ability", _selectedAbility, typeof(AbilityData), false);
 
         if (_selectedAbility != null)
         {
@@ -91,7 +91,7 @@ public class AbilityEditor : EditorWindow
 
     private void CreateAbilityAction()
     {
-        Ability ability = CreateInstance<Ability>();
+        AbilityData ability = CreateInstance<AbilityData>();
         ability.AbilityName = _abilityName;
 
         string path = $"Assets/ScriptableObjects/Abilities/{_abilityName}.asset";

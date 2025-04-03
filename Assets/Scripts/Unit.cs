@@ -55,7 +55,7 @@ public class Unit : MonoBehaviour
     private void OnSelectAction()
     {
         StopAllCoroutines();
-
+        UIManager.Instance.ActivateUnitProperties(_XP, _HP, _maxHP, _stamina, _maxStamina, _damage);
         _moveSelectedAction.performed += OnMoveSelected;
     }
 
@@ -63,6 +63,7 @@ public class Unit : MonoBehaviour
     {
         _moveSelectedAction.performed -= OnMoveSelected;
         StartCoroutine(MoveUnselected());
+        UIManager.Instance.DeactivateUnitProperties();
     }
 
     private void OnMoveSelected(InputAction.CallbackContext context)
@@ -73,7 +74,6 @@ public class Unit : MonoBehaviour
         float clampedZ = Mathf.Clamp(targetPosition.z, -UnitsSpawner.Instance.SpawnAreaSize.z, UnitsSpawner.Instance.SpawnAreaSize.z);
         targetPosition = new Vector3(clampedX, transform.position.y, clampedZ);
         transform.position = targetPosition;
-        SpendStamina(10); //test stamina
     }
 
     private IEnumerator MoveUnselected()
@@ -137,7 +137,7 @@ public class Unit : MonoBehaviour
         while (_stamina < _maxStamina)
         {
             RestoreStamina(_restoreStaminaValue);
-            //Debug.Log($"Restoring stamina: {_stamina}/{_maxStamina} for GO {gameObject.name}");
+            UIManager.Instance.UpdateStaminaText(_stamina, _maxStamina);
             yield return new WaitForSeconds(_restoreStaminaDelay);
         }
 
