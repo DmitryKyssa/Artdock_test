@@ -1,11 +1,12 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class AbilitiesManager : Singleton<AbilitiesManager>
 {
     [SerializeField] private bool _loadFromResources = true;
     [SerializeField] private List<AbilityData> _abilities = new List<AbilityData>();
-    //TODO: Add keys
+    private List<InputAction> _actions = new List<InputAction>();
 
     protected override void Awake()
     {
@@ -20,11 +21,35 @@ public class AbilitiesManager : Singleton<AbilitiesManager>
     private void LoadAbilities()
     {
         AbilityData[] abilities = Resources.LoadAll<AbilityData>("Abilities");
-        foreach (AbilityData ability in abilities)
+        for (int i = 0; i < abilities.Length; i++)
         {
-            if (!_abilities.Contains(ability))
+            int index = i;
+            if (!_abilities.Contains(abilities[i]))
             {
-                _abilities.Add(ability);
+                _abilities.Add(abilities[i]);
+                InputAction action = new InputAction(_abilities[^1].AbilityName, InputActionType.Button, "<Keyboard>/" + (i + 1));
+                if (_abilities[^1].Condition == Condition.None)
+                {
+                    action.Enable();
+                }
+                else
+                {
+                    action.Disable();
+                }
+
+                action.performed += context =>
+                {
+                    Debug.Log($"Ability {_abilities[index].AbilityName} casted.");
+                    AbilityContext abilityContext = new AbilityContext
+                    {
+                        Caster = UnitSelector.Instance.SelectedGO.GetComponent<Unit>(),
+                        CastPoint = UnitSelector.Instance.SelectedGO.GetComponent<Unit>().VfxCastPoint.position,
+                    };
+
+                    StartCoroutine(_abilities[index].CastAbility(abilityContext));
+                };
+
+                _actions.Add(action);
             }
         }
 

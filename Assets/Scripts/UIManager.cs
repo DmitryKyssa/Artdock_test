@@ -22,6 +22,7 @@ public class UIManager : Singleton<UIManager>
     [Header("Abilities")]
     [SerializeField] private GameObject _abilitiesPanel;
     [SerializeField] private List<AbilityOnUI> _abilitiesOnUI = new List<AbilityOnUI>();
+    [SerializeField] private GameObject _keyboardImageGO;
 
     public List<AbilityOnUI> AbilitiesOnUI { get => _abilitiesOnUI; set => _abilitiesOnUI = value; }
 
@@ -31,6 +32,7 @@ public class UIManager : Singleton<UIManager>
         _startButton.onClick.AddListener(StartGame);
         _unitPropertiesPanel.SetActive(false);
         _abilitiesPanel.SetActive(false);
+        _keyboardImageGO.SetActive(false);
     }
 
     private void StartGame()
@@ -43,6 +45,7 @@ public class UIManager : Singleton<UIManager>
     {
         _unitPropertiesPanel.SetActive(true);
         _abilitiesPanel.SetActive(true);
+        _keyboardImageGO.SetActive(true);
         _xpText.text = XPText + xp;
         _hpText.text = HPText + hp + "/" + maxHP;
         _staminaText.text = StaminaText + stamina + "/" + maxStamina;
@@ -53,6 +56,7 @@ public class UIManager : Singleton<UIManager>
     {
         _unitPropertiesPanel.SetActive(false);
         _abilitiesPanel.SetActive(false);
+        _keyboardImageGO.SetActive(false);
     }
 
     public void UpdateHPText(int hp, int maxHP)

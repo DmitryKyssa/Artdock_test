@@ -41,12 +41,12 @@ public class UnitSelector : Singleton<UnitSelector>
                     }
 
                     SelectedGO.transform.GetChild(0).gameObject.SetActive(false);
-                    SelectedGO.GetComponent<Unit>()._deselectAction?.Invoke();
+                    SelectedGO.GetComponent<Unit>().deselectAction?.Invoke();
                 }
 
                 SelectedGO = hit.collider.gameObject;
                 SelectedGO.transform.GetChild(0).gameObject.SetActive(true);
-                SelectedGO.GetComponent<Unit>()._selectAction?.Invoke();
+                SelectedGO.GetComponent<Unit>().selectAction?.Invoke();
             }
         }
     }

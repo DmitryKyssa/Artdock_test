@@ -59,7 +59,7 @@ public class StatusEffectEditor : EditorWindow
         statusEffectData.IsEndless = _isEndless;
         statusEffectData.Duration = _isEndless ? 0 : _duration;
         statusEffectData.IsPeriodic = _isPeriodic;
-        statusEffectData.Period = _isPeriodic ? _period : 0;
+        statusEffectData.Period = _isPeriodic ? _period : _duration;
         statusEffectData.AffectedResource = _affectedResource;
         statusEffectData.AffectedResourceValuePerPeriod = _affectedResourceValuePerPeriod;
 

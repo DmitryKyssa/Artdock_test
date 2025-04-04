@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -25,22 +26,54 @@ public class AbilityData : ScriptableObject
 
     public IEnumerator CastAbility(AbilityContext context)
     {
+        List<Unit> allies = new List<Unit>();
+        List<Unit> enemies = new List<Unit>();
+        if (context.Caster.gameObject.layer == UnitsSpawner.Instance.FirstTeamLayerValue)
+        {
+            allies.AddRange(UnitsSpawner.Instance.FirstTeamUnits);
+            enemies.AddRange(UnitsSpawner.Instance.SecondTeamUnits);
+        }
+        else
+        {
+            allies.AddRange(UnitsSpawner.Instance.SecondTeamUnits);
+            enemies.AddRange(UnitsSpawner.Instance.FirstTeamUnits);
+        }
+
         context.Caster.DeductResource(ResourceCost);
 
         if (AnimationDatas != null && AnimationDatas.Count > 0)
         {
             foreach (AnimationData animationData in AnimationDatas)
             {
-                if (animationData.TargetType == TargetType.Self)
+                switch (animationData.TargetType)
                 {
-                    animationData.PlayAnimation(context.Caster);
-                }
-                else
-                {
-                    foreach (Unit target in context.Targets)
-                    {
-                        animationData.PlayAnimation(target);
-                    }
+                    case TargetType.Self:
+                        animationData.PlayAnimation(context.Caster);
+                        break;
+                    case TargetType.Allies:
+                        foreach (Unit ally in allies)
+                        {
+                            animationData.PlayAnimation(ally);
+                        }
+                        break;
+                    case TargetType.Enemies:
+                        foreach (Unit enemy in enemies)
+                        {
+                            animationData.PlayAnimation(enemy);
+                        }
+                        break;
+                    case TargetType.All:
+                        foreach (Unit ally in allies)
+                        {
+                            animationData.PlayAnimation(ally);
+                        }
+                        foreach (Unit enemy in enemies)
+                        {
+                            animationData.PlayAnimation(enemy);
+                        }
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(animationData.TargetType), animationData.TargetType, null);
                 }
             }
         }
@@ -49,16 +82,35 @@ public class AbilityData : ScriptableObject
         {
             foreach (VFXData vfxData in VFXDatas)
             {
-                if (vfxData.TargetType == TargetType.Self)
+                switch (vfxData.TargetType)
                 {
-                    CoroutineRunner.Instance.Run(vfxData.PlayVFX(context.Caster));
-                }
-                else
-                {
-                    foreach (Unit target in context.Targets)
-                    {
-                        CoroutineRunner.Instance.Run(vfxData.PlayVFX(target));
-                    }
+                    case TargetType.Self:
+                        CoroutineRunner.Instance.Run(vfxData.PlayVFX(context.Caster));
+                        break;
+                    case TargetType.Allies:
+                        foreach (Unit ally in allies)
+                        {
+                            CoroutineRunner.Instance.Run(vfxData.PlayVFX(ally));
+                        }
+                        break;
+                    case TargetType.Enemies:
+                        foreach (Unit enemy in enemies)
+                        {
+                            CoroutineRunner.Instance.Run(vfxData.PlayVFX(enemy));
+                        }
+                        break;
+                    case TargetType.All:
+                        foreach (Unit ally in allies)
+                        {
+                            CoroutineRunner.Instance.Run(vfxData.PlayVFX(ally));
+                        }
+                        foreach (Unit enemy in enemies)
+                        {
+                            CoroutineRunner.Instance.Run(vfxData.PlayVFX(enemy));
+                        }
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(vfxData.TargetType), vfxData.TargetType, null);
                 }
             }
         }
@@ -68,41 +120,101 @@ public class AbilityData : ScriptableObject
             CoroutineRunner.Instance.Run(SFXData.PlaySFX(context.Caster));
         }
 
-        if (StatusEffectData != null)
-        {
-            if(StatusEffectData.TargetType == TargetType.Self)
-            {
-                context.Caster.ApplyEffect(StatusEffectData);
-            }
-            else
-            {
-                foreach (Unit target in context.Targets)
-                {
-                    target.ApplyEffect(StatusEffectData);
-                }
-            }
-        }
-
         switch (TargetType)
         {
             case TargetType.Self:
                 context.Caster.AffectResource(AffectedResource, AffectedResourceValue);
                 context.Caster.RecievedResource(ReceivedResourceValue);
                 break;
-            case TargetType.Enemy or TargetType.Ally or TargetType.Allies or TargetType.All or TargetType.Enemies:
-                context.Caster.CreateEffectZone(Zone, AreaOfEffectRadius);
-                foreach (Unit target in context.Targets)
+            case TargetType.Allies:
+                context.Caster.CreateZone(Zone, AreaOfEffectRadius); 
+                foreach (Unit ally in allies)
                 {
-                    target.AffectResource(AffectedResource, AffectedResourceValue);
-                    target.RecievedResource(ReceivedResourceValue);
-                }      
+                    if (ally.IsInAbilityZone)
+                    {
+                        ally.AffectResource(AffectedResource, AffectedResourceValue);
+                    }
+                }
+                break;
+            case TargetType.Enemies:
+                context.Caster.CreateZone(Zone, AreaOfEffectRadius);
+                foreach (Unit enemy in enemies)
+                {
+                    if (enemy.IsInAbilityZone)
+                    {
+                        enemy.AffectResource(AffectedResource, AffectedResourceValue);
+                    }
+                }
+                break;
+            case TargetType.All:
+                context.Caster.CreateZone(Zone, AreaOfEffectRadius);
+                foreach (Unit ally in allies)
+                {
+                    if (ally.IsInAbilityZone)
+                    {
+                        ally.AffectResource(AffectedResource, AffectedResourceValue);
+                    }
+                }
+                foreach (Unit enemy in enemies)
+                {
+                    if (enemy.IsInAbilityZone)
+                    {
+                        enemy.AffectResource(AffectedResource, AffectedResourceValue);
+                    }
+                }
                 break;
             default:
-                throw new System.ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException(nameof(TargetType), TargetType, null);
+        }
+
+        if (StatusEffectData != null)
+        {
+            switch (StatusEffectData.TargetType)
+            {
+                case TargetType.Self:
+                    context.Caster.ApplyEffect(StatusEffectData);
+                    break;
+                case TargetType.Allies:
+                    foreach (Unit ally in allies)
+                    {
+                        ally.ApplyEffect(StatusEffectData);
+                    }
+                    break;
+                case TargetType.Enemies:
+                    foreach (Unit enemy in enemies)
+                    {
+                        enemy.ApplyEffect(StatusEffectData);
+                    }
+                    break;
+                case TargetType.All:
+                    foreach (Unit ally in allies)
+                    {
+                        ally.ApplyEffect(StatusEffectData);
+                    }
+                    foreach (Unit enemy in enemies)
+                    {
+                        enemy.ApplyEffect(StatusEffectData);
+                    }
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(StatusEffectData.TargetType), StatusEffectData.TargetType, null);
+            }
         }
 
         UIManager.Instance.StartAbilityCooldown(AbilityName);
 
         yield return new WaitForSeconds(CastTime);
+        context.Caster.DestroyZone();
+
+        foreach (Unit ally in allies)
+        {
+            ally.IsInAbilityZone = false;
+        }
+        foreach (Unit enemy in enemies)
+        {
+            enemy.IsInAbilityZone = false;
+        }
+
+        Debug.Log($"Ability {AbilityName} casted by {context.Caster.name}");
     }
 }

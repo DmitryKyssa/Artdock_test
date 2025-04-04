@@ -9,8 +9,8 @@ public class Unit : MonoBehaviour, IEffectable
     private Animator _animator;
     [SerializeField] private Transform _vfxCastPoint;
 
-    public Action _selectAction;
-    public Action _deselectAction;
+    public Action selectAction;
+    public Action deselectAction;
     private readonly Vector3[] _directions = { Vector3.forward, Vector3.back, Vector3.left, Vector3.right };
     [SerializeField] private float _moveDelay = 1f;
     [SerializeField] private float _moveDuration = 1f;
@@ -28,14 +28,23 @@ public class Unit : MonoBehaviour, IEffectable
 
     public Animator Animator => _animator;
     public Transform VfxCastPoint => _vfxCastPoint;
+    public bool IsInAbilityZone { get; set; } = false;
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject == _abilityZoneGO)
+        {
+            IsInAbilityZone = true;
+        }
+    }
 
     private void Awake()
     {
         _meshRenderer = GetComponent<MeshRenderer>();
         _animator = GetComponent<Animator>();
 
-        _selectAction += OnSelectAction;
-        _deselectAction += OnDeselectAction;
+        selectAction += OnSelectAction;
+        deselectAction += OnDeselectAction;
 
         _moveSelectedAction = new InputAction("MoveSelected", InputActionType.Value);
         _moveSelectedAction.AddCompositeBinding("2DVector")
@@ -48,16 +57,17 @@ public class Unit : MonoBehaviour, IEffectable
 
     private void Start()
     {
-        _deselectAction?.Invoke();
-        _HP = _maxHP;
+        deselectAction?.Invoke();
+        _HP = _maxHP - 80;
         _stamina = _maxStamina = 100; //why _maxStamina == 0?
         //Debug.Log($"HP: {_HP}/{_maxHP}, stamina: {_stamina}/{_maxStamina} for GO {gameObject.name}");
+        _abilityZoneGO.SetActive(false);
     }
 
     private void OnDestroy()
     {
-        _selectAction -= OnSelectAction;
-        _deselectAction -= OnDeselectAction;
+        selectAction -= OnSelectAction;
+        deselectAction -= OnDeselectAction;
         _moveSelectedAction.Disable();
     }
 
@@ -122,20 +132,6 @@ public class Unit : MonoBehaviour, IEffectable
         //TODO: Add logic for leveling up => adding new abilities
     }
 
-    public void TakeDamage(int value)
-    {
-        _HP = Mathf.Clamp(_HP - value, 0, _maxHP);
-        if (_HP == 0)
-        {
-            Destroy(gameObject);
-        }
-    }
-
-    public void DealDamage(Unit unit)
-    {
-        unit.TakeDamage(_damage);
-    }
-
     public void RestoreStamina(int value)
     {
         _stamina = Mathf.Clamp(_stamina + value, 0, _maxStamina);
@@ -156,6 +152,7 @@ public class Unit : MonoBehaviour, IEffectable
     public void SpendStamina(int value)
     {
         _stamina = Mathf.Clamp(_stamina - value, 0, _maxStamina);
+        Debug.Log($"Stamina: {_stamina}/{_maxStamina} for GO {gameObject.name}");
 
         _restoreStaminaCoroutine ??= StartCoroutine(RestoreStaminaPeriodically());
     }
@@ -170,7 +167,7 @@ public class Unit : MonoBehaviour, IEffectable
         switch (affectedResource)
         {
             case AffectedResourceType.HP:
-                TakeDamage(value);
+                ChangeHP(value);
                 break;
             case AffectedResourceType.MovementSpeed:
                 _moveDuration = Mathf.Infinity;
@@ -185,23 +182,82 @@ public class Unit : MonoBehaviour, IEffectable
         AddXP(value);
     }
 
-    public void CreateEffectZone(Zone effectZone, float area)
+    public void DestroyZone()
     {
-        //TODO: Implement this method
+        _abilityZoneGO.SetActive(false);
     }
 
-    public void Heal(int value)
+    public void CreateZone(Zone zone, float area)
+    {
+        switch (zone)
+        {
+            case Zone.SingleTarget:
+                _abilityZoneGO.SetActive(false);
+                break;
+            case Zone.AutoAreaOfEffect:
+                _abilityZoneGO.SetActive(true);
+                _abilityZoneGO.transform.localScale = new Vector3(area, 1f, area);
+                break;
+            case Zone.CustomAreaOfEffect:
+                break;
+            case Zone.AllLocation:
+                _abilityZoneGO.SetActive(true);
+                _abilityZoneGO.transform.localScale = new Vector3(UnitsSpawner.Instance.SpawnAreaSize.x, 1f, UnitsSpawner.Instance.SpawnAreaSize.z);
+                break;
+        }
+    }
+
+    public void ChangeHP(int value)
     {
         _HP = Mathf.Clamp(_HP + value, 0, _maxHP);
+        UIManager.Instance.UpdateHPText(_HP, _maxHP);
+
+        if (_HP == 0)
+        {
+            Debug.Log($"Unit {gameObject.name} is dead.");
+            Destroy(gameObject);
+        }
     }
 
     public void ApplyEffect(StatusEffectData statusEffect)
     {
-        throw new NotImplementedException();
+        if (statusEffect.IsEndless)
+        {
+            StartCoroutine(ApplyEndlessEffect(statusEffect));
+            Debug.Log($"Applying endless effect: {statusEffect.StatusEffectName}");
+        }
+        else
+        {
+            Debug.Log($"Applying timed effect: {statusEffect.StatusEffectName} for {statusEffect.Duration} seconds");
+            StartCoroutine(ApplyTimedEffect(statusEffect));
+        }
+    }
+
+    private IEnumerator ApplyEndlessEffect(StatusEffectData statusEffect)
+    {
+        while (true)
+        {
+            AffectResource(statusEffect.AffectedResource, statusEffect.AffectedResourceValuePerPeriod);
+            yield return new WaitForSeconds(statusEffect.Period);
+        }
+    }
+
+    private IEnumerator ApplyTimedEffect(StatusEffectData statusEffect)
+    {
+        if (statusEffect.IsPeriodic)
+        {
+            for (int i = 0; i < statusEffect.Duration / statusEffect.Period; i++)
+            {
+                AffectResource(statusEffect.AffectedResource, statusEffect.AffectedResourceValuePerPeriod);
+                yield return new WaitForSeconds(statusEffect.Period);
+            }
+        }
+
+        RemoveEffect(statusEffect);
     }
 
     public void RemoveEffect(StatusEffectData statusEffect)
     {
-        throw new NotImplementedException();
+        Debug.Log($"Removing effect: {statusEffect.StatusEffectName} from {gameObject.name}");
     }
 }

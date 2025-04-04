@@ -1584,6 +1584,7 @@ MonoBehaviour:
   - {fileID: 1294438734}
   - {fileID: 1610001978}
   - {fileID: 1349393663}
+  _keyboardImageGO: {fileID: 18984416}
 --- !u!1 &721794866
 GameObject:
   m_ObjectHideFlags: 0

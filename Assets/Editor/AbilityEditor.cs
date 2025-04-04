@@ -302,7 +302,7 @@ public class AbilityEditor : EditorWindow
     private void TargetAndEffectZone()
     {
         _targetType = (TargetType)EditorGUILayout.EnumPopup("Target Type", _targetType);
-        if (_targetType == TargetType.Enemy || _targetType == TargetType.Ally || _targetType == TargetType.Self)
+        if (_targetType == TargetType.Self)
         {
             _zone = Zone.SingleTarget;
             _areaOfEffectRadius = 0f;

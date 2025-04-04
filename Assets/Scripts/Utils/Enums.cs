@@ -1,9 +1,7 @@
 public enum TargetType
 {
     Self,
-    Enemy,
     Enemies,
-    Ally,
     Allies,
     All
 }
