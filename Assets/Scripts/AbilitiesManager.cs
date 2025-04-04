@@ -39,13 +39,13 @@ public class AbilitiesManager : Singleton<AbilitiesManager>
 
                 action.performed += context =>
                 {
-                    Debug.Log($"Ability {_abilities[index].AbilityName} casted.");
                     AbilityContext abilityContext = new AbilityContext
                     {
                         Caster = UnitSelector.Instance.SelectedGO.GetComponent<Unit>(),
                         CastPoint = UnitSelector.Instance.SelectedGO.GetComponent<Unit>().VfxCastPoint.position,
                     };
 
+                    Debug.Log($"Ability {_abilities[index].AbilityName} casted from {abilityContext.Caster.gameObject.name}");
                     StartCoroutine(_abilities[index].CastAbility(abilityContext));
                 };
 
@@ -67,6 +67,7 @@ public class AbilitiesManager : Singleton<AbilitiesManager>
             abilityOnUI.AbilityName = _abilities[i].AbilityName;
             abilityOnUI.Cooldown = _abilities[i].CooldownAfterUsing;
             abilityOnUI.SetUpIcon();
+            abilityOnUI.KeyText.text = $"'{i + 1}'";
         }
     }
 }

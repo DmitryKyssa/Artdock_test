@@ -13,11 +13,9 @@ public class UIManager : Singleton<UIManager>
     [SerializeField] private TMP_Text _xpText;
     [SerializeField] private TMP_Text _hpText;
     [SerializeField] private TMP_Text _staminaText;
-    [SerializeField] private TMP_Text _damageText;
     public const string XPText = "XP: ";
     public const string HPText = "HP: ";
     public const string StaminaText = "Stamina: ";
-    public const string DamageText = "Damage: ";
 
     [Header("Abilities")]
     [SerializeField] private GameObject _abilitiesPanel;
@@ -41,7 +39,7 @@ public class UIManager : Singleton<UIManager>
         _startButton.interactable = false;
     }
 
-    public void ActivateUnitProperties(int xp, int hp, int maxHP, int stamina, int maxStamina, int damage)
+    public void ActivateUnitProperties(int xp, int hp, int maxHP, int stamina, int maxStamina)
     {
         _unitPropertiesPanel.SetActive(true);
         _abilitiesPanel.SetActive(true);
@@ -49,7 +47,6 @@ public class UIManager : Singleton<UIManager>
         _xpText.text = XPText + xp;
         _hpText.text = HPText + hp + "/" + maxHP;
         _staminaText.text = StaminaText + stamina + "/" + maxStamina;
-        _damageText.text = DamageText + damage;
     }
 
     public void DeactivateUnitProperties()
@@ -72,11 +69,6 @@ public class UIManager : Singleton<UIManager>
     public void UpdateXPText(int xp)
     {
         _xpText.text = XPText + xp;
-    }
-
-    public void UpdateDamageText(int damage)
-    {
-        _damageText.text = DamageText + damage;
     }
 
     public void StartAbilityCooldown(string abilityName)

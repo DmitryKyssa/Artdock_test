@@ -46,35 +46,35 @@ public class UnitsSpawner : Singleton<UnitsSpawner>
         _firstTeamLayerValue = (int)Mathf.Log(_firstTeamLayer.value, 2);
         for (int i = 0; i < _firstTeamUnitsCount; i++)
         {
-            SpawnUnit(_firstTeamColor, _firstTeamLayerValue, _firstTeamParent);
-            FirstTeamUnits.Add(_unitPrefab);
+            FirstTeamUnits.Add(SpawnUnit(_firstTeamColor, _firstTeamLayerValue, _firstTeamParent));
         }
 
         _secondTeamLayerValue = (int)Mathf.Log(_secondTeamLayer.value, 2);
         for (int i = 0; i < _secondTeamUnitsCount; i++)
         {
-            SpawnUnit(_secondTeamColor, _secondTeamLayerValue, _secondTeamParent);
-            SecondTeamUnits.Add(_unitPrefab);
+            SecondTeamUnits.Add(SpawnUnit(_secondTeamColor, _secondTeamLayerValue, _secondTeamParent));
         }
         AllUnits.AddRange(FirstTeamUnits);
         AllUnits.AddRange(SecondTeamUnits);
     }
 
-    private void SpawnUnit(Color color, int layer, Transform parent)
+    private Unit SpawnUnit(Color color, int layer, Transform parent)
     {
         Unit unit = Instantiate(_unitPrefab, GetRandomPosition(), Quaternion.identity, parent);
         unit.SetColor(color);
         unit.SetLayer(layer);
-        unit.gameObject.name = parent == _firstTeamParent 
-            ? _firstTeamUnitName + FirstTeamUnits.Count 
+        unit.gameObject.name = parent == _firstTeamParent
+            ? _firstTeamUnitName + FirstTeamUnits.Count
             : _secondTeamUnitName + SecondTeamUnits.Count;
+
+        return unit;
     }
 
     private Vector3 GetRandomPosition()
     {
         Vector3 spawnPoint = Vector3.zero;
-        float unitRadius = 1f; 
-        int maxAttempts = 10; 
+        float unitRadius = 1f;
+        int maxAttempts = 10;
 
         for (int i = 0; i < maxAttempts; i++)
         {

@@ -16,10 +16,9 @@ public class Unit : MonoBehaviour, IEffectable
     [SerializeField] private float _moveDuration = 1f;
     [SerializeField] private int _XP;
     private int _HP;
-    [SerializeField] private int _maxHP = 100;
-    [SerializeField] private int _damage;
+    private const int MaxHP = 100;
     private int _stamina;
-    [SerializeField] private int _maxStamina = 100;
+    private const int MaxStamina = 100;
     [SerializeField] private int _restoreStaminaValue = 1;
     [SerializeField] private int _restoreStaminaDelay = 1;
     private InputAction _moveSelectedAction;
@@ -58,9 +57,8 @@ public class Unit : MonoBehaviour, IEffectable
     private void Start()
     {
         deselectAction?.Invoke();
-        _HP = _maxHP - 80;
-        _stamina = _maxStamina = 100; //why _maxStamina == 0?
-        //Debug.Log($"HP: {_HP}/{_maxHP}, stamina: {_stamina}/{_maxStamina} for GO {gameObject.name}");
+        _HP = MaxHP - 20;
+        _stamina = MaxStamina;
         _abilityZoneGO.SetActive(false);
     }
 
@@ -74,7 +72,7 @@ public class Unit : MonoBehaviour, IEffectable
     private void OnSelectAction()
     {
         StopAllCoroutines();
-        UIManager.Instance.ActivateUnitProperties(_XP, _HP, _maxHP, _stamina, _maxStamina, _damage);
+        UIManager.Instance.ActivateUnitProperties(_XP, _HP, MaxHP, _stamina, MaxStamina);
         _moveSelectedAction.performed += OnMoveSelected;
     }
 
@@ -129,20 +127,20 @@ public class Unit : MonoBehaviour, IEffectable
     public void AddXP(int value)
     {
         _XP += value;
-        //TODO: Add logic for leveling up => adding new abilities
+        UIManager.Instance.UpdateXPText(_XP);
     }
 
     public void RestoreStamina(int value)
     {
-        _stamina = Mathf.Clamp(_stamina + value, 0, _maxStamina);
+        _stamina = Mathf.Clamp(_stamina + value, 0, MaxStamina);
     }
 
     private IEnumerator RestoreStaminaPeriodically()
     {
-        while (_stamina < _maxStamina)
+        while (_stamina < MaxStamina)
         {
             RestoreStamina(_restoreStaminaValue);
-            UIManager.Instance.UpdateStaminaText(_stamina, _maxStamina);
+            UIManager.Instance.UpdateStaminaText(_stamina, MaxStamina);
             yield return new WaitForSeconds(_restoreStaminaDelay);
         }
 
@@ -151,8 +149,9 @@ public class Unit : MonoBehaviour, IEffectable
 
     public void SpendStamina(int value)
     {
-        _stamina = Mathf.Clamp(_stamina - value, 0, _maxStamina);
-        Debug.Log($"Stamina: {_stamina}/{_maxStamina} for GO {gameObject.name}");
+        _stamina = Mathf.Clamp(_stamina - value, 0, MaxStamina);
+        Debug.Log($"Stamina: {_stamina}/{MaxStamina} for GO {gameObject.name}");
+        UIManager.Instance.UpdateStaminaText(_stamina, MaxStamina);
 
         _restoreStaminaCoroutine ??= StartCoroutine(RestoreStaminaPeriodically());
     }
@@ -196,7 +195,7 @@ public class Unit : MonoBehaviour, IEffectable
                 break;
             case Zone.AutoAreaOfEffect:
                 _abilityZoneGO.SetActive(true);
-                _abilityZoneGO.transform.localScale = new Vector3(area, 1f, area);
+                _abilityZoneGO.transform.localScale = new Vector3(area, area, area);
                 break;
             case Zone.CustomAreaOfEffect:
                 break;
@@ -209,8 +208,8 @@ public class Unit : MonoBehaviour, IEffectable
 
     public void ChangeHP(int value)
     {
-        _HP = Mathf.Clamp(_HP + value, 0, _maxHP);
-        UIManager.Instance.UpdateHPText(_HP, _maxHP);
+        _HP = Mathf.Clamp(_HP + value, 0, MaxHP);
+        UIManager.Instance.UpdateHPText(_HP, MaxHP);
 
         if (_HP == 0)
         {

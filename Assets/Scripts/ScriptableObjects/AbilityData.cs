@@ -120,16 +120,18 @@ public class AbilityData : ScriptableObject
             CoroutineRunner.Instance.Run(SFXData.PlaySFX(context.Caster));
         }
 
+        context.Caster.RecievedResource(ReceivedResourceValue);
+
         switch (TargetType)
         {
             case TargetType.Self:
                 context.Caster.AffectResource(AffectedResource, AffectedResourceValue);
-                context.Caster.RecievedResource(ReceivedResourceValue);
                 break;
             case TargetType.Allies:
                 context.Caster.CreateZone(Zone, AreaOfEffectRadius); 
                 foreach (Unit ally in allies)
                 {
+                    Debug.Log($"Ally {ally.name} is in ability zone: {ally.IsInAbilityZone}");
                     if (ally.IsInAbilityZone)
                     {
                         ally.AffectResource(AffectedResource, AffectedResourceValue);
