@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 using UnityEditor;
 using UnityEngine;
 
@@ -47,16 +46,21 @@ public class AbilityEditor : EditorWindow
     private TargetType _vfxTargetType;
     private VFXData _fromSavedVFXData;
 
-    [Header("Editing existing ability")]
-    private string _newAbilityName = "New Ability";
+    private string _newAbilityName = "Rename ability";
     private AbilityData _selectedAbility;
 
     private Vector2 _scrollPosition = Vector2.zero;
+    private AbilityData _abilityForSaving;
 
     [MenuItem("Window/Ability Editor")]
     public static void ShowWindow()
     {
         GetWindow<AbilityEditor>("Ability Editor");
+    }
+
+    private void OnEnable()
+    {
+        _abilityForSaving = CreateInstance<AbilityData>();
     }
 
     private void OnGUI()
@@ -116,6 +120,7 @@ public class AbilityEditor : EditorWindow
 
         if (GUILayout.Button("Reset"))
         {
+            _abilityForSaving = CreateInstance<AbilityData>();
             _abilityName = "New Ability";
             _sprite = null;
             _description = string.Empty;
@@ -172,16 +177,14 @@ public class AbilityEditor : EditorWindow
         }
 
         _newStatusEffectData = (StatusEffectData)EditorGUILayout.ObjectField("Add Status Effect Data", _newStatusEffectData, typeof(StatusEffectData), false);
-
-        if (_newStatusEffectData != null)
-        {
-            Debug.Log($"New Status Effect Data: {_newStatusEffectData.StatusEffectName}");
-        }
         if (GUILayout.Button("Add new Status Effect Data"))
         {
             if (_newStatusEffectData != null)
             {
+                _abilityForSaving.StatusEffectDatas.Add(_newStatusEffectData);
                 _statusEffectDatas.Add(_newStatusEffectData);
+                _newStatusEffectData = null;
+                Debug.Log($"Added new Status Effect Data: {_abilityForSaving.StatusEffectDatas[^1].StatusEffectName}");
             }
             _newStatusEffectData = null;
         }
@@ -199,16 +202,6 @@ public class AbilityEditor : EditorWindow
             if (GUILayout.Button("Remove"))
             {
                 _vfxDatas.RemoveAt(i);
-                break;
-            }
-
-            if (GUILayout.Button("Save"))
-            {
-                string path = $"Assets/ScriptableObjects/VFX/{_abilityName}_{_vfxDatas.Count}.asset";
-                AssetDatabase.CreateAsset(_vfxDatas[i], path);
-                AssetDatabase.SaveAssets();
-                AssetDatabase.Refresh();
-                EditorUtility.FocusProjectWindow();
                 break;
             }
         }
@@ -261,16 +254,6 @@ public class AbilityEditor : EditorWindow
             if (GUILayout.Button("Remove"))
             {
                 _animationDatas.RemoveAt(i);
-                break;
-            }
-
-            if (GUILayout.Button("Save"))
-            {
-                string path = $"Assets/ScriptableObjects/Animation/{_abilityName}_{_animationDatas.Count}.asset";
-                AssetDatabase.CreateAsset(_animationDatas[i], path);
-                AssetDatabase.SaveAssets();
-                AssetDatabase.Refresh();
-                EditorUtility.FocusProjectWindow();
                 break;
             }
         }
@@ -335,15 +318,6 @@ public class AbilityEditor : EditorWindow
         _sfxData.IsOffsetFromStart = _isOffsetFromStart;
         _sfxData.OffsetFromStart = _offsetFromStart;
 
-        if (GUILayout.Button("Save SFX Data"))
-        {
-            string path = $"Assets/ScriptableObjects/SFX/{_abilityName}.asset";
-            AssetDatabase.CreateAsset(_sfxData, path);
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-            EditorUtility.FocusProjectWindow();
-        }
-
         _fromSavedSFXData = (SFXData)EditorGUILayout.ObjectField("SFX Data from assets", _fromSavedSFXData, typeof(SFXData), false);
         if (GUILayout.Button("Add an existing SFX Data"))
         {
@@ -354,7 +328,6 @@ public class AbilityEditor : EditorWindow
             _fromSavedSFXData = null;
         }
     }
-
 
     private void TargetAndEffectZone()
     {
@@ -443,58 +416,68 @@ public class AbilityEditor : EditorWindow
 
     private void CreateAbilityAction()
     {
-        AbilityData ability = CreateInstance<AbilityData>();
-        ability.AbilityName = _abilityName;
-        ability.Sprite = _sprite;
-        ability.Description = _description;
-        ability.TargetType = _targetType;
-        ability.EffectZone = _effectZone;
-        ability.AreaOfEffectRadius = _areaOfEffectRadius;
-        ability.CastTime = _castTime;
-        ability.SpentResource = _spentResource;
-        ability.ResourceCost = _resourceCost;
-        ability.AffectedResource = _affectedResource;
-        ability.AffectedResourceValue = _affectedResourceValue;
-        ability.ReceivedResource = _receivedResource;
-        ability.ReceivedResourceValue = _receivedResourceValue;
-        ability.CooldownAfterUsing = _cooldownAfterUsing;
-        ability.Condition = _condition;
-        ability.ConditionValue = _conditionValue;
+        if(_abilityName != _abilityForSaving.AbilityName)
+        {
+            _abilityForSaving = CreateInstance<AbilityData>();
+        }
+
+        _abilityForSaving.AbilityName = _abilityName;
+        _abilityForSaving.Sprite = _sprite;
+        _abilityForSaving.Description = _description;
+        _abilityForSaving.TargetType = _targetType;
+        _abilityForSaving.EffectZone = _effectZone;
+        _abilityForSaving.AreaOfEffectRadius = _areaOfEffectRadius;
+        _abilityForSaving.CastTime = _castTime;
+        _abilityForSaving.SpentResource = _spentResource;
+        _abilityForSaving.ResourceCost = _resourceCost;
+        _abilityForSaving.AffectedResource = _affectedResource;
+        _abilityForSaving.AffectedResourceValue = _affectedResourceValue;
+        _abilityForSaving.ReceivedResource = _receivedResource;
+        _abilityForSaving.ReceivedResourceValue = _receivedResourceValue;
+        _abilityForSaving.CooldownAfterUsing = _cooldownAfterUsing;
+        _abilityForSaving.Condition = _condition;
+        _abilityForSaving.ConditionValue = _conditionValue;
         for (int i = 0; i < _animationDatas.Count; i++)
         {
-            ability.AnimationDatas.Add(_animationDatas[i]);
+            _abilityForSaving.AnimationDatas.Add(_animationDatas[i]);
         }
 
         if (_sfxData != null)
         {
-            _sfxData.name = $"{_abilityName}_SFX";
-            string pathSFX = $"Assets/ScriptableObjects/SFX/{_sfxData.name}.asset";
-            AssetDatabase.CreateAsset(_sfxData, pathSFX);
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-            ability.SFXData = _sfxData;
-        }
-        else
-        {
-            Debug.LogWarning("No SFX data selected!");
+            if (AssetDatabase.Contains(_sfxData))
+            {
+                var newSFXData = CreateInstance<SFXData>();
+                newSFXData.AudioClip = _sfxData.AudioClip;
+                newSFXData.IsOffsetFromStart = _sfxData.IsOffsetFromStart;
+                newSFXData.OffsetFromStart = _sfxData.OffsetFromStart;
+
+                newSFXData.name = $"{_abilityName}_SFX";
+                string pathSFX = $"Assets/ScriptableObjects/SFX/{newSFXData.name}.asset";
+
+                AssetDatabase.CreateAsset(newSFXData, pathSFX);
+                AssetDatabase.SaveAssets();
+                AssetDatabase.Refresh();
+                _abilityForSaving.SFXData = newSFXData;
+            }
         }
 
         for (int i = 0; i < _vfxDatas.Count; i++)
         {
-            ability.VFXDatas.Add(_vfxDatas[i]);
+            _abilityForSaving.VFXDatas.Add(_vfxDatas[i]);
         }
+
         for (int i = 0; i < _statusEffectDatas.Count; i++)
         {
-            ability.StatusEffectDatas.Add(_statusEffectDatas[i]);
+            _abilityForSaving.StatusEffectDatas.Add(_statusEffectDatas[i]);
         }
 
         string path = $"Assets/ScriptableObjects/Abilities/{_abilityName}.asset";
-        AssetDatabase.CreateAsset(ability, path);
+        AssetDatabase.CreateAsset(_abilityForSaving, path);
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
         EditorUtility.FocusProjectWindow();
-        Selection.activeObject = ability;
+        Selection.activeObject = _abilityForSaving;
         Debug.Log($"Created new ability: {_abilityName}");
     }
 }
