@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,16 +14,23 @@ public class UIManager : Singleton<UIManager>
     [SerializeField] private TMP_Text _hpText;
     [SerializeField] private TMP_Text _staminaText;
     [SerializeField] private TMP_Text _damageText;
-    private const string XPText = "XP: ";
-    private const string HPText = "HP: ";
-    private const string StaminaText = "Stamina: ";
-    private const string DamageText = "Damage: ";
+    public const string XPText = "XP: ";
+    public const string HPText = "HP: ";
+    public const string StaminaText = "Stamina: ";
+    public const string DamageText = "Damage: ";
 
-    public override void Awake()
+    [Header("Abilities")]
+    [SerializeField] private GameObject _abilitiesPanel;
+    [SerializeField] private List<AbilityOnUI> _abilitiesOnUI = new List<AbilityOnUI>();
+
+    public List<AbilityOnUI> AbilitiesOnUI { get => _abilitiesOnUI; set => _abilitiesOnUI = value; }
+
+    protected override void Awake()
     {
         base.Awake();
         _startButton.onClick.AddListener(StartGame);
         _unitPropertiesPanel.SetActive(false);
+        _abilitiesPanel.SetActive(false);
     }
 
     private void StartGame()
@@ -33,6 +42,7 @@ public class UIManager : Singleton<UIManager>
     public void ActivateUnitProperties(int xp, int hp, int maxHP, int stamina, int maxStamina, int damage)
     {
         _unitPropertiesPanel.SetActive(true);
+        _abilitiesPanel.SetActive(true);
         _xpText.text = XPText + xp;
         _hpText.text = HPText + hp + "/" + maxHP;
         _staminaText.text = StaminaText + stamina + "/" + maxStamina;
@@ -42,6 +52,7 @@ public class UIManager : Singleton<UIManager>
     public void DeactivateUnitProperties()
     {
         _unitPropertiesPanel.SetActive(false);
+        _abilitiesPanel.SetActive(false);
     }
 
     public void UpdateHPText(int hp, int maxHP)
@@ -62,5 +73,27 @@ public class UIManager : Singleton<UIManager>
     public void UpdateDamageText(int damage)
     {
         _damageText.text = DamageText + damage;
+    }
+
+    public void StartAbilityCooldown(string abilityName)
+    {
+        StartCoroutine(AbilityCooldown(abilityName));
+    }
+
+    private IEnumerator AbilityCooldown(string abilityName)
+    {
+        for(int i = 0; i < _abilitiesOnUI.Count; i++)
+        {
+            if (_abilitiesOnUI[i].AbilityName == abilityName)
+            {
+                _abilitiesOnUI[i].Icon.fillAmount = 1;
+                while (_abilitiesOnUI[i].Icon.fillAmount > 0)
+                {
+                    _abilitiesOnUI[i].Icon.fillAmount -= Time.deltaTime / _abilitiesOnUI[i].Cooldown;
+                    yield return null;
+                }
+                break;
+            }
+        }
     }
 }

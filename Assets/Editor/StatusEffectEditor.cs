@@ -1,11 +1,11 @@
 using UnityEditor;
-using UnityEditor.Playables;
 using UnityEngine;
 
 public class StatusEffectEditor : EditorWindow
 {
     private string _statusEffectName;
     private string _description;
+    private TargetType _targetType;
     private bool _isEndless;
     private int _duration;
     private bool _isPeriodic;
@@ -27,6 +27,8 @@ public class StatusEffectEditor : EditorWindow
 
         EditorGUILayout.LabelField("Description", EditorStyles.label);
         _description = EditorGUILayout.TextArea(_description, GUILayout.Height(60));
+
+        _targetType = (TargetType)EditorGUILayout.EnumPopup("Target Type", _targetType);
 
         _isEndless = EditorGUILayout.Toggle("Is Endless", _isEndless);
         if (!_isEndless)
@@ -53,6 +55,7 @@ public class StatusEffectEditor : EditorWindow
         statusEffectData.name = _statusEffectName;
         statusEffectData.StatusEffectName = _statusEffectName;
         statusEffectData.Description = _description;
+        statusEffectData.TargetType = _targetType;
         statusEffectData.IsEndless = _isEndless;
         statusEffectData.Duration = _isEndless ? 0 : _duration;
         statusEffectData.IsPeriodic = _isPeriodic;
@@ -60,7 +63,7 @@ public class StatusEffectEditor : EditorWindow
         statusEffectData.AffectedResource = _affectedResource;
         statusEffectData.AffectedResourceValuePerPeriod = _affectedResourceValuePerPeriod;
 
-        string path = $"Assets/ScriptableObjects/StatusEffects/{statusEffectData}.asset";
+        string path = $"Assets/Resources/StatusEffects/{statusEffectData}.asset";
         AssetDatabase.CreateAsset(statusEffectData, path);
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();

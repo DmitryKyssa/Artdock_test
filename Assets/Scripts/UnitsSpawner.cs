@@ -28,7 +28,7 @@ public class UnitsSpawner : Singleton<UnitsSpawner>
 
     public Vector3 SpawnAreaSize => _spawnAreaSize;
 
-    public override void Awake()
+    protected override void Awake()
     {
         base.Awake();
         _spawnAreaPosition = _spawnArea.transform.position;

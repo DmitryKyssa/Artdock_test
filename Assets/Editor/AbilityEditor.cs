@@ -11,14 +11,12 @@ public class AbilityEditor : EditorWindow
     private Sprite _sprite;
     private string _description;
     private TargetType _targetType;
-    private EffectZone _effectZone;
+    private Zone _zone;
     private float _areaOfEffectRadius;
     private float _castTime;
-    private SpentResourceType _spentResource;
     private int _resourceCost;
     private AffectedResourceType _affectedResource;
     private int _affectedResourceValue;
-    private ReceivedResourceType _receivedResource;
     private int _receivedResourceValue;
     private float _cooldownAfterUsing;
     private Condition _condition;
@@ -33,8 +31,7 @@ public class AbilityEditor : EditorWindow
     private TargetType _animationTargetType;
     private AnimationData _fromSavedAnimationData;
 
-    private List<StatusEffectData> _statusEffectDatas = new List<StatusEffectData>();
-    private StatusEffectData _newStatusEffectData;
+    private StatusEffectData _statusEffectData;
 
     private SFXData _sfxData;
     private SFXData _fromSavedSFXData;
@@ -85,14 +82,11 @@ public class AbilityEditor : EditorWindow
         TargetAndEffectZone();
 
         _castTime = EditorGUILayout.FloatField("Cast Time", _castTime);
-
-        _spentResource = (SpentResourceType)EditorGUILayout.EnumPopup("Spent Resource", _spentResource);
         _resourceCost = EditorGUILayout.IntField("Resource Cost", _resourceCost);
 
         _affectedResource = (AffectedResourceType)EditorGUILayout.EnumPopup("Affected Resource", _affectedResource);
         _affectedResourceValue = EditorGUILayout.IntField("Affected Resource Value", _affectedResourceValue);
 
-        _receivedResource = (ReceivedResourceType)EditorGUILayout.EnumPopup("Received Resource", _receivedResource);
         _receivedResourceValue = EditorGUILayout.IntField("Received Resource Value", _receivedResourceValue);
 
         _cooldownAfterUsing = EditorGUILayout.FloatField("Cooldown After Using", _cooldownAfterUsing);
@@ -125,14 +119,12 @@ public class AbilityEditor : EditorWindow
             _sprite = null;
             _description = string.Empty;
             _targetType = TargetType.Self;
-            _effectZone = EffectZone.SingleTarget;
+            _zone = Zone.SingleTarget;
             _areaOfEffectRadius = 0f;
             _castTime = 0f;
-            _spentResource = SpentResourceType.Stamina;
             _resourceCost = 0;
             _affectedResource = AffectedResourceType.HP;
             _affectedResourceValue = 0;
-            _receivedResource = ReceivedResourceType.None;
             _receivedResourceValue = 0;
             _cooldownAfterUsing = 0f;
             _condition = Condition.None;
@@ -165,29 +157,7 @@ public class AbilityEditor : EditorWindow
     {
         GUILayout.Label("Status Effect Data List", EditorStyles.boldLabel);
 
-        for (int i = 0; i < _statusEffectDatas.Count; i++)
-        {
-            _statusEffectDatas[i] = (StatusEffectData)EditorGUILayout.ObjectField("Status Effect Data", _statusEffectDatas[i], typeof(StatusEffectData), false);
-
-            if (GUILayout.Button("Remove"))
-            {
-                _statusEffectDatas.RemoveAt(i);
-                break;
-            }
-        }
-
-        _newStatusEffectData = (StatusEffectData)EditorGUILayout.ObjectField("Add Status Effect Data", _newStatusEffectData, typeof(StatusEffectData), false);
-        if (GUILayout.Button("Add new Status Effect Data"))
-        {
-            if (_newStatusEffectData != null)
-            {
-                _abilityForSaving.StatusEffectDatas.Add(_newStatusEffectData);
-                _statusEffectDatas.Add(_newStatusEffectData);
-                _newStatusEffectData = null;
-                Debug.Log($"Added new Status Effect Data: {_abilityForSaving.StatusEffectDatas[^1].StatusEffectName}");
-            }
-            _newStatusEffectData = null;
-        }
+        _statusEffectData = EditorGUILayout.ObjectField("Status Effect Data", _statusEffectData, typeof(StatusEffectData), false) as StatusEffectData;
     }
 
     private void VFXDataCreate()
@@ -212,7 +182,7 @@ public class AbilityEditor : EditorWindow
             if (_vfxDatas.Count > 0)
             {
                 VFXData newVFXData = _vfxDatas[^1];
-                string path = $"Assets/ScriptableObjects/VFX/{_abilityName}_{_vfxDatas.Count}.asset";
+                string path = $"Assets/Resources/VFX/{_abilityName}_{_vfxDatas.Count}.asset";
                 AssetDatabase.CreateAsset(newVFXData, path);
                 AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();
@@ -287,7 +257,7 @@ public class AbilityEditor : EditorWindow
             if (_animationDatas.Count > 0)
             {
                 AnimationData newAnimationData = _animationDatas[^1];
-                string path = $"Assets/ScriptableObjects/Animation/{_abilityName}_{_animationDatas.Count}.asset";
+                string path = $"Assets/Resources/Animation/{_abilityName}_{_animationDatas.Count}.asset";
                 AssetDatabase.CreateAsset(newAnimationData, path);
                 AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();
@@ -334,28 +304,28 @@ public class AbilityEditor : EditorWindow
         _targetType = (TargetType)EditorGUILayout.EnumPopup("Target Type", _targetType);
         if (_targetType == TargetType.Enemy || _targetType == TargetType.Ally || _targetType == TargetType.Self)
         {
-            _effectZone = EffectZone.SingleTarget;
+            _zone = Zone.SingleTarget;
             _areaOfEffectRadius = 0f;
         }
         else if (_targetType == TargetType.All)
         {
-            _effectZone = EffectZone.AllLocation;
+            _zone = Zone.AllLocation;
             _areaOfEffectRadius = 0f;
         }
         else
         {
-            EffectZone[] allowedValues = Enum.GetValues(typeof(EffectZone))
-                .Cast<EffectZone>()
-                .Where(value => value != EffectZone.SingleTarget && value != EffectZone.AllLocation)
+            Zone[] allowedValues = Enum.GetValues(typeof(Zone))
+                .Cast<Zone>()
+                .Where(value => value != Zone.SingleTarget && value != Zone.AllLocation)
                 .ToArray();
 
-            int selectedIndex = Array.IndexOf(allowedValues, _effectZone);
+            int selectedIndex = Array.IndexOf(allowedValues, _zone);
             if (selectedIndex == -1)
             {
                 selectedIndex = 0;
             }
             selectedIndex = EditorGUILayout.Popup("Effect Zone", selectedIndex, allowedValues.Select(v => v.ToString()).ToArray());
-            _effectZone = allowedValues[selectedIndex];
+            _zone = allowedValues[selectedIndex];
             _areaOfEffectRadius = EditorGUILayout.FloatField("Area of Effect Radius", _areaOfEffectRadius);
         }
     }
@@ -425,14 +395,12 @@ public class AbilityEditor : EditorWindow
         _abilityForSaving.Sprite = _sprite;
         _abilityForSaving.Description = _description;
         _abilityForSaving.TargetType = _targetType;
-        _abilityForSaving.EffectZone = _effectZone;
+        _abilityForSaving.Zone = _zone;
         _abilityForSaving.AreaOfEffectRadius = _areaOfEffectRadius;
         _abilityForSaving.CastTime = _castTime;
-        _abilityForSaving.SpentResource = _spentResource;
         _abilityForSaving.ResourceCost = _resourceCost;
         _abilityForSaving.AffectedResource = _affectedResource;
         _abilityForSaving.AffectedResourceValue = _affectedResourceValue;
-        _abilityForSaving.ReceivedResource = _receivedResource;
         _abilityForSaving.ReceivedResourceValue = _receivedResourceValue;
         _abilityForSaving.CooldownAfterUsing = _cooldownAfterUsing;
         _abilityForSaving.Condition = _condition;
@@ -452,7 +420,7 @@ public class AbilityEditor : EditorWindow
                 newSFXData.OffsetFromStart = _sfxData.OffsetFromStart;
 
                 newSFXData.name = $"{_abilityName}_SFX";
-                string pathSFX = $"Assets/ScriptableObjects/SFX/{newSFXData.name}.asset";
+                string pathSFX = $"Assets/Resources/SFX/{newSFXData.name}.asset";
 
                 AssetDatabase.CreateAsset(newSFXData, pathSFX);
                 AssetDatabase.SaveAssets();
@@ -466,12 +434,15 @@ public class AbilityEditor : EditorWindow
             _abilityForSaving.VFXDatas.Add(_vfxDatas[i]);
         }
 
-        for (int i = 0; i < _statusEffectDatas.Count; i++)
+        if (_statusEffectData != null)
         {
-            _abilityForSaving.StatusEffectDatas.Add(_statusEffectDatas[i]);
+            if (AssetDatabase.Contains(_statusEffectData))
+            {
+                _abilityForSaving.StatusEffectData = _statusEffectData;
+            }
         }
 
-        string path = $"Assets/ScriptableObjects/Abilities/{_abilityName}.asset";
+        string path = $"Assets/Resources/Abilities/{_abilityName}.asset";
         AssetDatabase.CreateAsset(_abilityForSaving, path);
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();

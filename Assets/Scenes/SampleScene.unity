@@ -1579,6 +1579,11 @@ MonoBehaviour:
   _hpText: {fileID: 86170676}
   _staminaText: {fileID: 1653100679}
   _damageText: {fileID: 913865057}
+  _abilitiesPanel: {fileID: 721794866}
+  _abilitiesOnUI:
+  - {fileID: 1294438734}
+  - {fileID: 1610001978}
+  - {fileID: 1349393663}
 --- !u!1 &721794866
 GameObject:
   m_ObjectHideFlags: 0
@@ -2441,7 +2446,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_Sprite: {fileID: 0}
-  m_Type: 0
+  m_Type: 3
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -2467,6 +2472,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1294438733}
+  - component: {fileID: 1294438734}
   m_Layer: 5
   m_Name: FirstAbility
   m_TagString: Untagged
@@ -2497,6 +2503,24 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 350, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1294438734
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1294438732}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34daf46c2dfe63248a4c0ea561416dd1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Icon: {fileID: 65199624}
+  SpentResourceText: {fileID: 972632025}
+  ReceivedResourceText: {fileID: 1374889534}
+  KeyText: {fileID: 1468714173}
+  AbilityName: 
+  Cooldown: 0
 --- !u!1 &1349393661
 GameObject:
   m_ObjectHideFlags: 0
@@ -2506,6 +2530,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1349393662}
+  - component: {fileID: 1349393663}
   m_Layer: 5
   m_Name: ThirdAbility
   m_TagString: Untagged
@@ -2536,6 +2561,24 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 350, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1349393663
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1349393661}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34daf46c2dfe63248a4c0ea561416dd1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Icon: {fileID: 1226511481}
+  SpentResourceText: {fileID: 2138161362}
+  ReceivedResourceText: {fileID: 797363526}
+  KeyText: {fileID: 1896597308}
+  AbilityName: 
+  Cooldown: 0
 --- !u!1 &1374889532
 GameObject:
   m_ObjectHideFlags: 0
@@ -2898,6 +2941,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1610001977}
+  - component: {fileID: 1610001978}
   m_Layer: 5
   m_Name: SecondAbility
   m_TagString: Untagged
@@ -2928,6 +2972,24 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 350, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1610001978
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1610001976}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34daf46c2dfe63248a4c0ea561416dd1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Icon: {fileID: 1073052569}
+  SpentResourceText: {fileID: 250937442}
+  ReceivedResourceText: {fileID: 560476514}
+  KeyText: {fileID: 534517095}
+  AbilityName: 
+  Cooldown: 0
 --- !u!1 &1653100677
 GameObject:
   m_ObjectHideFlags: 0
@@ -3334,6 +3396,7 @@ GameObject:
   - component: {fileID: 2056462078}
   - component: {fileID: 2056462079}
   - component: {fileID: 2056462080}
+  - component: {fileID: 2056462081}
   m_Layer: 0
   m_Name: AllUnitsManager
   m_TagString: Untagged
@@ -3403,6 +3466,20 @@ MonoBehaviour:
     m_Bits: 128
   _mainCamera: {fileID: 330585545}
   _selectableTag: Unit
+--- !u!114 &2056462081
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2056462077}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2383d30d8afad6148b952ed0579799fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _loadFromResources: 1
+  _abilities: []
 --- !u!1 &2138161360
 GameObject:
   m_ObjectHideFlags: 0

@@ -12,7 +12,7 @@ public class UnitSelector : Singleton<UnitSelector>
 
     public GameObject SelectedGO { get; private set; }
 
-    public override void Awake()
+    protected override void Awake()
     {
         base.Awake();
         _selectAction = new InputAction("Select", InputActionType.Button, "<Mouse>/leftButton");

@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections;
-using System.Dynamic;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.InputSystem;
 
-public class Unit : MonoBehaviour
+public class Unit : MonoBehaviour, IEffectable
 {
     private MeshRenderer _meshRenderer;
     private Animator _animator;
@@ -26,6 +24,7 @@ public class Unit : MonoBehaviour
     [SerializeField] private int _restoreStaminaDelay = 1;
     private InputAction _moveSelectedAction;
     private Coroutine _restoreStaminaCoroutine;
+    [SerializeField] private GameObject _abilityZoneGO;
 
     public Animator Animator => _animator;
     public Transform VfxCastPoint => _vfxCastPoint;
@@ -161,8 +160,48 @@ public class Unit : MonoBehaviour
         _restoreStaminaCoroutine ??= StartCoroutine(RestoreStaminaPeriodically());
     }
 
+    public void DeductResource(int value)
+    {
+        SpendStamina(value);
+    }
+
+    public void AffectResource(AffectedResourceType affectedResource, int value)
+    {
+        switch (affectedResource)
+        {
+            case AffectedResourceType.HP:
+                TakeDamage(value);
+                break;
+            case AffectedResourceType.MovementSpeed:
+                _moveDuration = Mathf.Infinity;
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(affectedResource), affectedResource, null);
+        }
+    }
+
+    public void RecievedResource(int value)
+    {
+        AddXP(value);
+    }
+
+    public void CreateEffectZone(Zone effectZone, float area)
+    {
+        //TODO: Implement this method
+    }
+
     public void Heal(int value)
     {
         _HP = Mathf.Clamp(_HP + value, 0, _maxHP);
+    }
+
+    public void ApplyEffect(StatusEffectData statusEffect)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void RemoveEffect(StatusEffectData statusEffect)
+    {
+        throw new NotImplementedException();
     }
 }
