@@ -56,14 +56,14 @@ public class UIManager : Singleton<UIManager>
         _keyboardImageGO.SetActive(false);
     }
 
-    public void UpdateHPText(int hp, int maxHP)
+    public void UpdateHPText(int hp)
     {
-        _hpText.text = HPText + hp + "/" + maxHP;
+        _hpText.text = HPText + hp + "/" + Unit.MaxHP;
     }
 
-    public void UpdateStaminaText(int stamina, int maxStamina)
+    public void UpdateStaminaText(int stamina)
     {
-        _staminaText.text = StaminaText + stamina + "/" + maxStamina;
+        _staminaText.text = StaminaText + stamina + "/" + Unit.MaxStamina;
     }
 
     public void UpdateXPText(int xp)

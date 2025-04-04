@@ -30,12 +30,24 @@ public class AbilityData : ScriptableObject
         List<Unit> enemies = new List<Unit>();
         if (context.Caster.gameObject.layer == UnitsSpawner.Instance.FirstTeamLayerValue)
         {
-            allies.AddRange(UnitsSpawner.Instance.FirstTeamUnits);
+            for (int i = 0; i < UnitsSpawner.Instance.FirstTeamUnits.Count; i++)
+            {
+                if (UnitsSpawner.Instance.FirstTeamUnits[i] != context.Caster)
+                {
+                    allies.Add(UnitsSpawner.Instance.FirstTeamUnits[i]);
+                }
+            }
             enemies.AddRange(UnitsSpawner.Instance.SecondTeamUnits);
         }
         else
         {
-            allies.AddRange(UnitsSpawner.Instance.SecondTeamUnits);
+            for (int i = 0; i < UnitsSpawner.Instance.SecondTeamUnits.Count; i++)
+            {
+                if (UnitsSpawner.Instance.SecondTeamUnits[i] != context.Caster)
+                {
+                    allies.Add(UnitsSpawner.Instance.SecondTeamUnits[i]);
+                }
+            }
             enemies.AddRange(UnitsSpawner.Instance.FirstTeamUnits);
         }
 
@@ -131,8 +143,7 @@ public class AbilityData : ScriptableObject
                 context.Caster.CreateZone(Zone, AreaOfEffectRadius); 
                 foreach (Unit ally in allies)
                 {
-                    Debug.Log($"Ally {ally.name} is in ability zone: {ally.IsInAbilityZone}");
-                    if (ally.IsInAbilityZone)
+                    if (Vector3.Distance(context.Caster.transform.position, ally.transform.position) <= AreaOfEffectRadius)
                     {
                         ally.AffectResource(AffectedResource, AffectedResourceValue);
                     }
@@ -142,7 +153,7 @@ public class AbilityData : ScriptableObject
                 context.Caster.CreateZone(Zone, AreaOfEffectRadius);
                 foreach (Unit enemy in enemies)
                 {
-                    if (enemy.IsInAbilityZone)
+                    if (Vector3.Distance(context.Caster.transform.position, enemy.transform.position) <= AreaOfEffectRadius)
                     {
                         enemy.AffectResource(AffectedResource, AffectedResourceValue);
                     }
@@ -152,14 +163,14 @@ public class AbilityData : ScriptableObject
                 context.Caster.CreateZone(Zone, AreaOfEffectRadius);
                 foreach (Unit ally in allies)
                 {
-                    if (ally.IsInAbilityZone)
+                    if (Vector3.Distance(context.Caster.transform.position, ally.transform.position) <= AreaOfEffectRadius)
                     {
                         ally.AffectResource(AffectedResource, AffectedResourceValue);
                     }
                 }
                 foreach (Unit enemy in enemies)
                 {
-                    if (enemy.IsInAbilityZone)
+                    if (Vector3.Distance(context.Caster.transform.position, enemy.transform.position) <= AreaOfEffectRadius)
                     {
                         enemy.AffectResource(AffectedResource, AffectedResourceValue);
                     }
@@ -207,15 +218,6 @@ public class AbilityData : ScriptableObject
 
         yield return new WaitForSeconds(CastTime);
         context.Caster.DestroyZone();
-
-        foreach (Unit ally in allies)
-        {
-            ally.IsInAbilityZone = false;
-        }
-        foreach (Unit enemy in enemies)
-        {
-            enemy.IsInAbilityZone = false;
-        }
 
         Debug.Log($"Ability {AbilityName} casted by {context.Caster.name}");
     }

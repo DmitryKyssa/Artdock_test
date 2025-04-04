@@ -16,9 +16,9 @@ public class Unit : MonoBehaviour, IEffectable
     [SerializeField] private float _moveDuration = 1f;
     [SerializeField] private int _XP;
     private int _HP;
-    private const int MaxHP = 100;
+    public const int MaxHP = 100;
     private int _stamina;
-    private const int MaxStamina = 100;
+    public const int MaxStamina = 100;
     [SerializeField] private int _restoreStaminaValue = 1;
     [SerializeField] private int _restoreStaminaDelay = 1;
     private InputAction _moveSelectedAction;
@@ -27,15 +27,6 @@ public class Unit : MonoBehaviour, IEffectable
 
     public Animator Animator => _animator;
     public Transform VfxCastPoint => _vfxCastPoint;
-    public bool IsInAbilityZone { get; set; } = false;
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.gameObject == _abilityZoneGO)
-        {
-            IsInAbilityZone = true;
-        }
-    }
 
     private void Awake()
     {
@@ -140,7 +131,7 @@ public class Unit : MonoBehaviour, IEffectable
         while (_stamina < MaxStamina)
         {
             RestoreStamina(_restoreStaminaValue);
-            UIManager.Instance.UpdateStaminaText(_stamina, MaxStamina);
+            UIManager.Instance.UpdateStaminaText(_stamina);
             yield return new WaitForSeconds(_restoreStaminaDelay);
         }
 
@@ -151,7 +142,7 @@ public class Unit : MonoBehaviour, IEffectable
     {
         _stamina = Mathf.Clamp(_stamina - value, 0, MaxStamina);
         Debug.Log($"Stamina: {_stamina}/{MaxStamina} for GO {gameObject.name}");
-        UIManager.Instance.UpdateStaminaText(_stamina, MaxStamina);
+        UIManager.Instance.UpdateStaminaText(_stamina);
 
         _restoreStaminaCoroutine ??= StartCoroutine(RestoreStaminaPeriodically());
     }
@@ -209,7 +200,7 @@ public class Unit : MonoBehaviour, IEffectable
     public void ChangeHP(int value)
     {
         _HP = Mathf.Clamp(_HP + value, 0, MaxHP);
-        UIManager.Instance.UpdateHPText(_HP, MaxHP);
+        UIManager.Instance.UpdateHPText(_HP);
 
         if (_HP == 0)
         {
