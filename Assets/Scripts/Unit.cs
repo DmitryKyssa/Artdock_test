@@ -1,11 +1,16 @@
 ﻿using System;
 using System.Collections;
+using System.Dynamic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.InputSystem;
 
 public class Unit : MonoBehaviour
 {
     private MeshRenderer _meshRenderer;
+    private Animator _animator;
+    [SerializeField] private Transform _vfxCastPoint;
+
     public Action _selectAction;
     public Action _deselectAction;
     private readonly Vector3[] _directions = { Vector3.forward, Vector3.back, Vector3.left, Vector3.right };
@@ -22,9 +27,14 @@ public class Unit : MonoBehaviour
     private InputAction _moveSelectedAction;
     private Coroutine _restoreStaminaCoroutine;
 
+    public Animator Animator => _animator;
+    public Transform VfxCastPoint => _vfxCastPoint;
+
     private void Awake()
     {
         _meshRenderer = GetComponent<MeshRenderer>();
+        _animator = GetComponent<Animator>();
+
         _selectAction += OnSelectAction;
         _deselectAction += OnDeselectAction;
 

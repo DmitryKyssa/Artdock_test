@@ -1,4 +1,4 @@
-public enum AbilityTargetType
+public enum TargetType
 {
     Self,
     Enemy,
@@ -8,24 +8,22 @@ public enum AbilityTargetType
     All
 }
 
-public enum AbilityEffectZone
+public enum EffectZone
 {
+    SingleTarget,
     AutoAreaOfEffect,
     CustomAreaOfEffect,
-    SingleTarget,
     AllLocation
 }
 
 public enum SpentResourceType
 {
-    None,
     Stamina,
     HP
 }
 
-public enum AppliedResourceType
+public enum AffectedResourceType
 {
-    None,
     HP,
     Stamina,
     MovementSpeed,
@@ -46,10 +44,4 @@ public enum Condition
 {
     None,
     XP,
-    Stamina
-}
-
-public enum StatusEffectType
-{
-    //TODO: Add more status effects
 }
