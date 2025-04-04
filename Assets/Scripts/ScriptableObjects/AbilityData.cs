@@ -218,7 +218,7 @@ public class AbilityData : ScriptableObject
 
         yield return new WaitForSeconds(CastTime);
         context.Caster.DestroyZone();
-
+        AbilitiesManager.Instance.AbilityFinishedAction?.Invoke(AbilityName);
         Debug.Log($"Ability {AbilityName} casted by {context.Caster.name}");
     }
 }

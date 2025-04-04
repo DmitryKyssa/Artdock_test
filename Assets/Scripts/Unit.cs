@@ -27,6 +27,7 @@ public class Unit : MonoBehaviour, IEffectable
 
     public Animator Animator => _animator;
     public Transform VfxCastPoint => _vfxCastPoint;
+    public int Stamina => _stamina;
 
     private void Awake()
     {

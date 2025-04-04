@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -7,6 +8,8 @@ public class AbilitiesManager : Singleton<AbilitiesManager>
     [SerializeField] private bool _loadFromResources = true;
     [SerializeField] private List<AbilityData> _abilities = new List<AbilityData>();
     private List<InputAction> _actions = new List<InputAction>();
+    private Dictionary<string, bool> _activeAbilities = new Dictionary<string, bool>();
+    public Action<string> AbilityFinishedAction;
 
     protected override void Awake()
     {
@@ -16,6 +19,14 @@ public class AbilitiesManager : Singleton<AbilitiesManager>
             LoadAbilities();
             SetAbilitiesForUI();
         }
+
+        AbilityFinishedAction += abilityName =>
+        {
+            if (_activeAbilities.ContainsKey(abilityName))
+            {
+                _activeAbilities[abilityName] = false;
+            }
+        };
     }
 
     private void LoadAbilities()
@@ -27,6 +38,7 @@ public class AbilitiesManager : Singleton<AbilitiesManager>
             if (!_abilities.Contains(abilities[i]))
             {
                 _abilities.Add(abilities[i]);
+                _activeAbilities.Add(abilities[i].AbilityName, false);
                 InputAction action = new InputAction(_abilities[^1].AbilityName, InputActionType.Button, "<Keyboard>/" + (i + 1));
                 if (_abilities[^1].Condition == Condition.None)
                 {
@@ -39,21 +51,30 @@ public class AbilitiesManager : Singleton<AbilitiesManager>
 
                 action.performed += context =>
                 {
+                    if (_activeAbilities[_abilities[index].AbilityName])
+                    {
+                        return;
+                    }
+
                     AbilityContext abilityContext = new AbilityContext
                     {
                         Caster = UnitSelector.Instance.SelectedGO.GetComponent<Unit>(),
                         CastPoint = UnitSelector.Instance.SelectedGO.GetComponent<Unit>().VfxCastPoint.position,
                     };
 
+                    if (abilityContext.Caster.Stamina < _abilities[index].ResourceCost)
+                    {
+                        return;
+                    }
+
                     Debug.Log($"Ability {_abilities[index].AbilityName} casted from {abilityContext.Caster.gameObject.name}");
                     StartCoroutine(_abilities[index].CastAbility(abilityContext));
+                    _activeAbilities[_abilities[index].AbilityName] = true;
                 };
 
                 _actions.Add(action);
             }
         }
-
-        Debug.Log($"Loaded {_abilities.Count} abilities from Resources.");
     }
 
     private void SetAbilitiesForUI()

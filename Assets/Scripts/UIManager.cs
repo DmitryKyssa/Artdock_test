@@ -82,10 +82,10 @@ public class UIManager : Singleton<UIManager>
         {
             if (_abilitiesOnUI[i].AbilityName == abilityName)
             {
-                _abilitiesOnUI[i].Icon.fillAmount = 1;
-                while (_abilitiesOnUI[i].Icon.fillAmount > 0)
+                _abilitiesOnUI[i].Icon.fillAmount = 0;
+                while (_abilitiesOnUI[i].Icon.fillAmount < 1)
                 {
-                    _abilitiesOnUI[i].Icon.fillAmount -= Time.deltaTime / _abilitiesOnUI[i].Cooldown;
+                    _abilitiesOnUI[i].Icon.fillAmount += Time.deltaTime / _abilitiesOnUI[i].Cooldown;
                     yield return null;
                 }
                 break;
