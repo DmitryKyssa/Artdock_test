@@ -1,14 +1,11 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class UnitSelector : Singleton<UnitSelector>
 {
-    [SerializeField] private List<LayerMask> _selectableLayers = new List<LayerMask>();
     [SerializeField] private Camera _mainCamera;
     [SerializeField] private string _selectableTag;
     private InputAction _selectAction;
-    private int _unitedLayerMask;
 
     public string SelectableTag => _selectableTag;
     public GameObject SelectedGO { get; private set; }
@@ -19,18 +16,13 @@ public class UnitSelector : Singleton<UnitSelector>
         _selectAction = new InputAction("Select", InputActionType.Button, "<Mouse>/leftButton");
         _selectAction.Enable();
         _selectAction.performed += OnSelect;
-
-        foreach (LayerMask layer in _selectableLayers)
-        {
-            _unitedLayerMask |= layer.value;
-        }
     }
 
     private void OnSelect(InputAction.CallbackContext context)
     {
         Ray ray = _mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
 
-        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, _unitedLayerMask))
+        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity))
         {
             if (hit.collider.CompareTag(_selectableTag))
             {
