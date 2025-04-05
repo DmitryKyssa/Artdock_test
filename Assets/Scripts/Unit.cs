@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -33,6 +34,8 @@ public class Unit : MonoBehaviour, IEffectable
 
     private float _castDistance = 1.5f;
     private float _castRadius = 0.5f;
+
+    private Dictionary<StatusEffectData, Coroutine> _activeStatusEffects = new Dictionary<StatusEffectData, Coroutine>();
 
     public Animator Animator => _animator;
     public Transform VfxCastPoint => _vfxCastPoint;
@@ -280,16 +283,33 @@ public class Unit : MonoBehaviour, IEffectable
 
     public void ApplyEffect(StatusEffectData statusEffect)
     {
+        if (_activeStatusEffects.ContainsKey(statusEffect))
+        {
+            if (statusEffect.IsEndless)
+            {
+                Debug.Log($"Endless effect {statusEffect.StatusEffectName} is already applied. Skipping.");
+                AddXP(10);
+                return;
+            }
+
+            Debug.Log($"Resetting effect: {statusEffect.StatusEffectName}");
+            StopCoroutine(_activeStatusEffects[statusEffect]);
+            _activeStatusEffects.Remove(statusEffect);
+        }
+
+        Coroutine routine;
         if (statusEffect.IsEndless)
         {
-            StartCoroutine(ApplyEndlessEffect(statusEffect));
+            routine = StartCoroutine(ApplyEndlessEffect(statusEffect));
             Debug.Log($"Applying endless effect: {statusEffect.StatusEffectName}");
         }
         else
         {
+            routine = StartCoroutine(ApplyTimedEffect(statusEffect));
             Debug.Log($"Applying timed effect: {statusEffect.StatusEffectName} for {statusEffect.Duration} seconds");
-            StartCoroutine(ApplyTimedEffect(statusEffect));
         }
+
+        _activeStatusEffects[statusEffect] = routine;
     }
 
     private IEnumerator ApplyEndlessEffect(StatusEffectData statusEffect)
@@ -312,11 +332,16 @@ public class Unit : MonoBehaviour, IEffectable
             }
         }
 
-        RemoveEffect(statusEffect);
+        ((IEffectable)this).RemoveEffect(statusEffect);
     }
 
-    public void RemoveEffect(StatusEffectData statusEffect)
+    void IEffectable.RemoveEffect(StatusEffectData statusEffect)
     {
-        Debug.Log($"Removing effect: {statusEffect.StatusEffectName} from {gameObject.name}");
+        if (_activeStatusEffects.TryGetValue(statusEffect, out Coroutine routine))
+        {
+            StopCoroutine(routine);
+            _activeStatusEffects.Remove(statusEffect);
+            Debug.Log($"Removed effect: {statusEffect.StatusEffectName} from {gameObject.name}");
+        }
     }
 }
