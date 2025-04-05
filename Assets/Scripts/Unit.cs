@@ -6,6 +6,9 @@ using UnityEngine.InputSystem;
 
 public class Unit : MonoBehaviour, IEffectable
 {
+    private string _unitTeam;
+    public string UnitTeam => _unitTeam;
+
     private MeshRenderer _meshRenderer;
     private Animator _animator;
     [SerializeField] private Transform _vfxCastPoint;
@@ -152,9 +155,9 @@ public class Unit : MonoBehaviour, IEffectable
         _meshRenderer.material.color = color;
     }
 
-    public void SetLayer(int layer)
+    public void SetUnitTeam(string team)
     {
-        gameObject.layer = layer;
+        _unitTeam = team;
     }
 
     public void AddXP(int value)

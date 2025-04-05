@@ -29,7 +29,7 @@ public class AbilityData : ScriptableObject
     {
         List<Unit> allies = new List<Unit>();
         List<Unit> enemies = new List<Unit>();
-        if (context.Caster.gameObject.layer == UnitsSpawner.Instance.FirstTeamLayerValue)
+        if (context.Caster.UnitTeam == UnitsSpawner.FirstTeamUnitName)
         {
             for (int i = 0; i < UnitsSpawner.Instance.FirstTeamUnits.Count; i++)
             {

@@ -13,25 +13,19 @@ public class UnitsSpawner : Singleton<UnitsSpawner>
     [Header("First team")]
     [SerializeField] private int _firstTeamUnitsCount;
     [SerializeField] private Color _firstTeamColor;
-    [SerializeField] private LayerMask _firstTeamLayer;
     [SerializeField] private Transform _firstTeamParent;
-    private int _firstTeamLayerValue;
     public List<Unit> FirstTeamUnits { get; private set; } = new List<Unit>();
-    private const string _firstTeamUnitName = "FirstTeamUnit_";
+    public const string FirstTeamUnitName = "FirstTeamUnit_";
 
     [Header("Second team")]
     [SerializeField] private int _secondTeamUnitsCount;
     [SerializeField] private Color _secondTeamColor;
-    [SerializeField] private LayerMask _secondTeamLayer;
     [SerializeField] private Transform _secondTeamParent;
-    private int _secondTeamLayerValue;
     public List<Unit> SecondTeamUnits { get; private set; } = new List<Unit>();
-    private const string _secondTeamUnitName = "SecondTeamUnit_";
+    public const string SecondTeamUnitName = "SecondTeamUnit_";
 
     public Vector3 SpawnAreaSize => _spawnAreaSize;
     public List<Unit> AllUnits { get; private set; } = new List<Unit>();
-    public int FirstTeamLayerValue => _firstTeamLayerValue;
-    public int SecondTeamLayerValue => _secondTeamLayerValue;
 
     protected override void Awake()
     {
@@ -43,29 +37,27 @@ public class UnitsSpawner : Singleton<UnitsSpawner>
 
     public void SpawnUnits()
     {
-        _firstTeamLayerValue = (int)Mathf.Log(_firstTeamLayer.value, 2);
         for (int i = 0; i < _firstTeamUnitsCount; i++)
         {
-            FirstTeamUnits.Add(SpawnUnit(_firstTeamColor, _firstTeamLayerValue, _firstTeamParent));
+            FirstTeamUnits.Add(SpawnUnit(_firstTeamColor, FirstTeamUnitName, _firstTeamParent));
         }
 
-        _secondTeamLayerValue = (int)Mathf.Log(_secondTeamLayer.value, 2);
         for (int i = 0; i < _secondTeamUnitsCount; i++)
         {
-            SecondTeamUnits.Add(SpawnUnit(_secondTeamColor, _secondTeamLayerValue, _secondTeamParent));
+            SecondTeamUnits.Add(SpawnUnit(_secondTeamColor, SecondTeamUnitName, _secondTeamParent));
         }
         AllUnits.AddRange(FirstTeamUnits);
         AllUnits.AddRange(SecondTeamUnits);
     }
 
-    private Unit SpawnUnit(Color color, int layer, Transform parent)
+    private Unit SpawnUnit(Color color, string team, Transform parent)
     {
         Unit unit = Instantiate(_unitPrefab, GetRandomPosition(), Quaternion.identity, parent);
         unit.SetColor(color);
-        unit.SetLayer(layer);
+        unit.SetUnitTeam(team);
         unit.gameObject.name = parent == _firstTeamParent
-            ? _firstTeamUnitName + FirstTeamUnits.Count
-            : _secondTeamUnitName + SecondTeamUnits.Count;
+            ? FirstTeamUnitName + FirstTeamUnits.Count
+            : SecondTeamUnitName + SecondTeamUnits.Count;
 
         return unit;
     }
