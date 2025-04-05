@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -26,6 +27,9 @@ public class Unit : MonoBehaviour, IEffectable
 
     [SerializeField] private GameObject _abilityZoneGO;
     private InputAction _abilityZoneAction;
+
+    private float _castDistance = 1.5f;
+    private float _castRadius = 0.5f;
 
     public Animator Animator => _animator;
     public Transform VfxCastPoint => _vfxCastPoint;
@@ -100,18 +104,44 @@ public class Unit : MonoBehaviour, IEffectable
     {
         while (true)
         {
-            Vector3 randomDirection = _directions[UnityEngine.Random.Range(0, _directions.Length)];
-            float clampedX = Mathf.Clamp(transform.position.x + randomDirection.x, -UnitsSpawner.Instance.SpawnAreaSize.x, UnitsSpawner.Instance.SpawnAreaSize.x);
-            float clampedZ = Mathf.Clamp(transform.position.z + randomDirection.z, -UnitsSpawner.Instance.SpawnAreaSize.z, UnitsSpawner.Instance.SpawnAreaSize.z);
+            Vector3[] shuffledDirections = _directions.OrderBy(_ => UnityEngine.Random.value).ToArray();
+            Vector3? chosenDirection = null;
+
+            foreach (var dir in shuffledDirections)
+            {
+                if (Physics.SphereCast(transform.position, _castRadius, dir, out RaycastHit hit, _castDistance))
+                {
+                    if (hit.collider.CompareTag(UnitSelector.Instance.SelectableTag))
+                    {
+                        continue; 
+                    }
+                }
+
+                chosenDirection = dir;
+                break;
+            }
+
+            if (chosenDirection == null)
+            {
+                yield return new WaitForSeconds(_moveDelay);
+                continue;
+            }
+
+            Vector3 direction = chosenDirection.Value;
+            float clampedX = Mathf.Clamp(transform.position.x + direction.x, -UnitsSpawner.Instance.SpawnAreaSize.x, UnitsSpawner.Instance.SpawnAreaSize.x);
+            float clampedZ = Mathf.Clamp(transform.position.z + direction.z, -UnitsSpawner.Instance.SpawnAreaSize.z, UnitsSpawner.Instance.SpawnAreaSize.z);
+
             Vector3 targetPosition = new Vector3(clampedX, transform.position.y, clampedZ);
-            float elapsedTime = 0f;
             Vector3 startPosition = transform.position;
+            float elapsedTime = 0f;
+
             while (elapsedTime < _moveDuration)
             {
                 transform.position = Vector3.Lerp(startPosition, targetPosition, elapsedTime / _moveDuration);
                 elapsedTime += Time.deltaTime;
                 yield return null;
             }
+
             transform.position = targetPosition;
             yield return new WaitForSeconds(_moveDelay);
         }

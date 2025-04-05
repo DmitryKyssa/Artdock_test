@@ -10,6 +10,7 @@ public class UnitSelector : Singleton<UnitSelector>
     private InputAction _selectAction;
     private int _unitedLayerMask;
 
+    public string SelectableTag => _selectableTag;
     public GameObject SelectedGO { get; private set; }
 
     protected override void Awake()
