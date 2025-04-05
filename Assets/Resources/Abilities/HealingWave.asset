@@ -16,8 +16,9 @@ MonoBehaviour:
   Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
   Description: 
   TargetType: 2
-  Zone: 1
-  AreaOfEffectRadius: 5
+  Zone: 2
+  AreaOfEffectRadius: 1
+  CustomAreaOfEffectPositioningDuration: 10
   CastTime: 2
   ResourceCost: 50
   AffectedResource: 0

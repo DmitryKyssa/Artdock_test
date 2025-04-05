@@ -13,6 +13,7 @@ public class AbilityEditor : EditorWindow
     private TargetType _targetType;
     private Zone _zone;
     private float _areaOfEffectRadius;
+    private float _customAreaOfEffectPositioningDuration;
     private float _castTime;
     private int _resourceCost;
     private AffectedResourceType _affectedResource;
@@ -327,6 +328,11 @@ public class AbilityEditor : EditorWindow
             selectedIndex = EditorGUILayout.Popup("Effect Zone", selectedIndex, allowedValues.Select(v => v.ToString()).ToArray());
             _zone = allowedValues[selectedIndex];
             _areaOfEffectRadius = EditorGUILayout.FloatField("Area of Effect Radius", _areaOfEffectRadius);
+
+            if (_zone == Zone.CustomAreaOfEffect)
+            {
+                _customAreaOfEffectPositioningDuration = EditorGUILayout.FloatField("Custom Area Positioning Duration", _customAreaOfEffectPositioningDuration);
+            }
         }
     }
 
@@ -397,6 +403,7 @@ public class AbilityEditor : EditorWindow
         _abilityForSaving.TargetType = _targetType;
         _abilityForSaving.Zone = _zone;
         _abilityForSaving.AreaOfEffectRadius = _areaOfEffectRadius;
+        _abilityForSaving.CustomAreaOfEffectPositioningDuration = _customAreaOfEffectPositioningDuration;
         _abilityForSaving.CastTime = _castTime;
         _abilityForSaving.ResourceCost = _resourceCost;
         _abilityForSaving.AffectedResource = _affectedResource;

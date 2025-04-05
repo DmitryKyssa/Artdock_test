@@ -23,11 +23,14 @@ public class Unit : MonoBehaviour, IEffectable
     [SerializeField] private int _restoreStaminaDelay = 1;
     private InputAction _moveSelectedAction;
     private Coroutine _restoreStaminaCoroutine;
+
     [SerializeField] private GameObject _abilityZoneGO;
+    private InputAction _abilityZoneAction;
 
     public Animator Animator => _animator;
     public Transform VfxCastPoint => _vfxCastPoint;
     public int Stamina => _stamina;
+    public Vector3 ZonePosition => _abilityZoneGO.transform.position;
 
     private void Awake()
     {
@@ -44,6 +47,14 @@ public class Unit : MonoBehaviour, IEffectable
             .With("Left", "<Keyboard>/a")
             .With("Right", "<Keyboard>/d");
         _moveSelectedAction.Enable();
+
+        _abilityZoneAction = new InputAction("AbilityZone", InputActionType.Value);
+        _abilityZoneAction.AddCompositeBinding("2DVector")
+            .With("Up", "<Keyboard>/upArrow")
+            .With("Down", "<Keyboard>/downArrow")
+            .With("Left", "<Keyboard>/leftArrow")
+            .With("Right", "<Keyboard>/rightArrow");
+        _abilityZoneAction.Disable();
     }
 
     private void Start()
@@ -168,17 +179,12 @@ public class Unit : MonoBehaviour, IEffectable
         }
     }
 
-    public void RecievedResource(int value)
+    public void ReceivedResource(int value)
     {
         AddXP(value);
     }
 
-    public void DestroyZone()
-    {
-        _abilityZoneGO.SetActive(false);
-    }
-
-    public void CreateZone(Zone zone, float area)
+    public void CreateZone(Zone zone, float area, float duration)
     {
         switch (zone)
         {
@@ -188,17 +194,46 @@ public class Unit : MonoBehaviour, IEffectable
             case Zone.AutoAreaOfEffect:
                 _abilityZoneGO.SetActive(true);
                 _abilityZoneGO.transform.localScale = new Vector3(area, area, area);
+                StartCoroutine(DisableZoneAfterDuration(duration));
                 break;
             case Zone.CustomAreaOfEffect:
+                _abilityZoneGO.SetActive(true);
+                _abilityZoneGO.transform.localScale = new Vector3(area, area, area);
+                _abilityZoneAction.Enable();
+                StartCoroutine(DisableZoneAfterDuration(duration));
+                _abilityZoneAction.performed += OnZoneMove;
                 break;
             case Zone.AllLocation:
                 _abilityZoneGO.SetActive(true);
+                _abilityZoneGO.transform.position = new Vector3(0f, 0f, 0f);
                 _abilityZoneGO.transform.localScale = new Vector3(UnitsSpawner.Instance.SpawnAreaSize.x, 1f, UnitsSpawner.Instance.SpawnAreaSize.z);
+                StartCoroutine(DisableZoneAfterDuration(duration));
                 break;
         }
     }
 
-    public void ChangeHP(int value)
+    private void OnZoneMove(InputAction.CallbackContext context)
+    {
+        Vector2 direction = context.ReadValue<Vector2>();
+        Vector3 targetPosition = transform.position + new Vector3(direction.x, 0f, direction.y);
+        float clampedX = Mathf.Clamp(targetPosition.x, -UnitsSpawner.Instance.SpawnAreaSize.x, UnitsSpawner.Instance.SpawnAreaSize.x);
+        float clampedZ = Mathf.Clamp(targetPosition.z, -UnitsSpawner.Instance.SpawnAreaSize.z, UnitsSpawner.Instance.SpawnAreaSize.z);
+        targetPosition = new Vector3(clampedX, transform.position.y, clampedZ);
+        _abilityZoneGO.transform.position = targetPosition;
+    }
+
+    private IEnumerator DisableZoneAfterDuration(float duration)
+    {
+        yield return new WaitForSeconds(duration);
+        _abilityZoneGO.SetActive(false);
+        if (_abilityZoneAction.enabled)
+        {
+            _abilityZoneAction.performed -= OnZoneMove;
+            _abilityZoneAction.Disable();
+        }
+    }
+
+    private void ChangeHP(int value)
     {
         _HP = Mathf.Clamp(_HP + value, 0, MaxHP);
         UIManager.Instance.UpdateHPText(_HP);

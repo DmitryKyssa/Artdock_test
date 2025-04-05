@@ -11,6 +11,7 @@ public class AbilityData : ScriptableObject
     public TargetType TargetType;
     public Zone Zone;
     public float AreaOfEffectRadius;
+    public float CustomAreaOfEffectPositioningDuration;
     public float CastTime;
     public int ResourceCost;
     public AffectedResourceType AffectedResource;
@@ -132,7 +133,7 @@ public class AbilityData : ScriptableObject
             CoroutineRunner.Instance.Run(SFXData.PlaySFX(context.Caster));
         }
 
-        context.Caster.RecievedResource(ReceivedResourceValue);
+        context.Caster.ReceivedResource(ReceivedResourceValue);
 
         switch (TargetType)
         {
@@ -140,37 +141,49 @@ public class AbilityData : ScriptableObject
                 context.Caster.AffectResource(AffectedResource, AffectedResourceValue);
                 break;
             case TargetType.Allies:
-                context.Caster.CreateZone(Zone, AreaOfEffectRadius); 
+                context.Caster.CreateZone(Zone, AreaOfEffectRadius, CustomAreaOfEffectPositioningDuration);
+                if (Zone == Zone.CustomAreaOfEffect)
+                {
+                    yield return new WaitForSeconds(CustomAreaOfEffectPositioningDuration);
+                }
                 foreach (Unit ally in allies)
                 {
-                    if (Vector3.Distance(context.Caster.transform.position, ally.transform.position) <= AreaOfEffectRadius)
+                    if (Vector3.Distance(context.Caster.ZonePosition, ally.transform.position) <= AreaOfEffectRadius)
                     {
                         ally.AffectResource(AffectedResource, AffectedResourceValue);
                     }
                 }
                 break;
             case TargetType.Enemies:
-                context.Caster.CreateZone(Zone, AreaOfEffectRadius);
+                context.Caster.CreateZone(Zone, AreaOfEffectRadius, CustomAreaOfEffectPositioningDuration);
+                if (Zone == Zone.CustomAreaOfEffect)
+                {
+                    yield return new WaitForSeconds(CustomAreaOfEffectPositioningDuration);
+                }
                 foreach (Unit enemy in enemies)
                 {
-                    if (Vector3.Distance(context.Caster.transform.position, enemy.transform.position) <= AreaOfEffectRadius)
+                    if (Vector3.Distance(context.Caster.ZonePosition, enemy.transform.position) <= AreaOfEffectRadius)
                     {
                         enemy.AffectResource(AffectedResource, AffectedResourceValue);
                     }
                 }
                 break;
             case TargetType.All:
-                context.Caster.CreateZone(Zone, AreaOfEffectRadius);
+                context.Caster.CreateZone(Zone, AreaOfEffectRadius, CustomAreaOfEffectPositioningDuration);
+                if (Zone == Zone.CustomAreaOfEffect)
+                {
+                    yield return new WaitForSeconds(CustomAreaOfEffectPositioningDuration);
+                }
                 foreach (Unit ally in allies)
                 {
-                    if (Vector3.Distance(context.Caster.transform.position, ally.transform.position) <= AreaOfEffectRadius)
+                    if (Vector3.Distance(context.Caster.ZonePosition, ally.transform.position) <= AreaOfEffectRadius)
                     {
                         ally.AffectResource(AffectedResource, AffectedResourceValue);
                     }
                 }
                 foreach (Unit enemy in enemies)
                 {
-                    if (Vector3.Distance(context.Caster.transform.position, enemy.transform.position) <= AreaOfEffectRadius)
+                    if (Vector3.Distance(context.Caster.ZonePosition, enemy.transform.position) <= AreaOfEffectRadius)
                     {
                         enemy.AffectResource(AffectedResource, AffectedResourceValue);
                     }
@@ -217,8 +230,6 @@ public class AbilityData : ScriptableObject
         UIManager.Instance.StartAbilityCooldown(AbilityName);
 
         yield return new WaitForSeconds(CastTime);
-        context.Caster.DestroyZone();
-        AbilitiesManager.Instance.AbilityFinishedAction?.Invoke(AbilityName);
         Debug.Log($"Ability {AbilityName} casted by {context.Caster.name}");
     }
 }
