@@ -7,74 +7,116 @@ public class AbilitiesManager : Singleton<AbilitiesManager>
 {
     [SerializeField] private bool _loadFromResources = true;
     [SerializeField] private List<AbilityData> _abilities = new List<AbilityData>();
+
     private List<InputAction> _actions = new List<InputAction>();
-    private Dictionary<string, bool> _activeAbilities = new Dictionary<string, bool>();
-    public Action<string> AbilityFinishedAction;
+    private Dictionary<string, Dictionary<string, bool>> _activeAbilitiesPerUnit = new();
+
+    public Action<string, string> AbilityFinishedAction; //first string - ability name, second string - unitName name
 
     protected override void Awake()
     {
         base.Awake();
+
         if (_loadFromResources)
         {
             LoadAbilities();
             SetAbilitiesForUI();
         }
 
-        AbilityFinishedAction += abilityName =>
+        AbilityFinishedAction += (abilityName, unit) =>
         {
-            if (_activeAbilities.ContainsKey(abilityName))
+            if (_activeAbilitiesPerUnit.TryGetValue(unit, out var unitAbilities) &&
+                unitAbilities.ContainsKey(abilityName))
             {
-                _activeAbilities[abilityName] = false;
+                unitAbilities[abilityName] = false;
             }
         };
+
+        UnitsSpawner.Instance.OnSpawnedAction += () =>
+        {
+            foreach (var unit in UnitsSpawner.Instance.AllUnits)
+            {
+                if (!_activeAbilitiesPerUnit.ContainsKey(unit.name))
+                {
+                    _activeAbilitiesPerUnit[unit.name] = new Dictionary<string, bool>();
+                }
+
+                foreach (var ability in _abilities)
+                {
+                    _activeAbilitiesPerUnit[unit.name][ability.AbilityName] = false;
+                }
+            }
+            Debug.Log($"Initialized {_abilities.Count} abilities for {_activeAbilitiesPerUnit.Count} units.");
+        };
+    }
+
+    public void RemoveUnitFromDictionary(string unitName)
+    {
+        if (_activeAbilitiesPerUnit.ContainsKey(unitName))
+        {
+            _activeAbilitiesPerUnit.Remove(unitName);
+        }
     }
 
     private void LoadAbilities()
     {
-        AbilityData[] abilities = Resources.LoadAll<AbilityData>("Abilities");
-        for (int i = 0; i < abilities.Length; i++)
-        {
-            int index = i;
-            if (!_abilities.Contains(abilities[i]))
-            {
-                _abilities.Add(abilities[i]);
-                _activeAbilities.Add(abilities[i].AbilityName, false);
-                InputAction action = new InputAction(_abilities[^1].AbilityName, InputActionType.Button, "<Keyboard>/" + (i + 1));
-                if (_abilities[^1].Condition == Condition.None)
-                {
-                    action.Enable();
-                }
-                else
-                {
-                    action.Disable();
-                }
+        AbilityData[] loadedAbilities = Resources.LoadAll<AbilityData>("Abilities");
 
-                action.performed += context =>
+        foreach (var ability in loadedAbilities)
+        {
+            if (_abilities.Contains(ability))
+            {
+                continue;
+            }
+
+            _abilities.Add(ability);
+
+            int index = _abilities.Count - 1;
+            InputAction action = new InputAction(ability.AbilityName, InputActionType.Button, "<Keyboard>/" + (index + 1));
+
+            if (ability.Condition == Condition.None)
+            {
+                action.Enable();
+            }
+            else
+            {
+                action.Disable();
+            }
+
+            action.performed += context =>
+            {
+                Unit selectedUnit = UnitSelector.Instance.SelectedGO;
+
+                if (_activeAbilitiesPerUnit.TryGetValue(selectedUnit.name, out var unitAbilities))
                 {
-                    if (_activeAbilities[_abilities[index].AbilityName])
+                    if (unitAbilities[ability.AbilityName])
+                    {
+                        Debug.Log($"Ability {ability.AbilityName} is already active for unit {selectedUnit.name}");
+                        return;
+                    }
+
+                    if (selectedUnit.Stamina < ability.ResourceCost)
                     {
                         return;
                     }
 
                     AbilityContext abilityContext = new AbilityContext
                     {
-                        Caster = UnitSelector.Instance.SelectedGO.GetComponent<Unit>(),
-                        CastPoint = UnitSelector.Instance.SelectedGO.GetComponent<Unit>().VfxCastPoint.position,
+                        Caster = selectedUnit,
+                        CastPoint = selectedUnit.VfxCastPoint.position,
                     };
 
-                    if (abilityContext.Caster.Stamina < _abilities[index].ResourceCost)
-                    {
-                        return;
-                    }
+                    Debug.Log($"Casting ability {ability.AbilityName} from {selectedUnit.name}");
+                    StartCoroutine(ability.CastAbility(abilityContext));
 
-                    Debug.Log($"Ability {_abilities[index].AbilityName} casted from {abilityContext.Caster.gameObject.name}");
-                    StartCoroutine(_abilities[index].CastAbility(abilityContext));
-                    _activeAbilities[_abilities[index].AbilityName] = true;
-                };
+                    unitAbilities[ability.AbilityName] = true;
+                }
+            };
 
-                _actions.Add(action);
-            }
+            _actions.Add(action);
         }
+
+        Debug.Log($"Loaded {_abilities.Count} abilities from Resources.");
     }
 
     private void SetAbilitiesForUI()

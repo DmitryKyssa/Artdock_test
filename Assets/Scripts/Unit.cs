@@ -70,7 +70,7 @@ public class Unit : MonoBehaviour, IEffectable
     private void Start()
     {
         deselectAction?.Invoke();
-        _HP = MaxHP - 20;
+        _HP = MaxHP;
         _stamina = MaxStamina;
         _abilityZoneGO.SetActive(false);
     }
@@ -82,9 +82,18 @@ public class Unit : MonoBehaviour, IEffectable
         _moveSelectedAction.Disable();
     }
 
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag(UnitSelector.Instance.SelectableTag))
+        {
+            Debug.Log($"Collision with {collision.gameObject.name}");
+        }
+    }
+
     private void OnSelectAction()
     {
         StopAllCoroutines();
+        UIManager.Instance.DeactivateUnitProperties();
         UIManager.Instance.ActivateUnitProperties(_XP, _HP, MaxHP, _stamina, MaxStamina);
         _moveSelectedAction.performed += OnMoveSelected;
     }
@@ -169,16 +178,11 @@ public class Unit : MonoBehaviour, IEffectable
         UIManager.Instance.UpdateXPText(_XP);
     }
 
-    public void RestoreStamina(int value)
-    {
-        _stamina = Mathf.Clamp(_stamina + value, 0, MaxStamina);
-    }
-
     private IEnumerator RestoreStaminaPeriodically()
     {
         while (_stamina < MaxStamina)
         {
-            RestoreStamina(_restoreStaminaValue);
+            _stamina = Mathf.Clamp(_stamina + _restoreStaminaValue, 0, MaxStamina);
             UIManager.Instance.UpdateStaminaText(_stamina);
             yield return new WaitForSeconds(_restoreStaminaDelay);
         }
@@ -189,7 +193,6 @@ public class Unit : MonoBehaviour, IEffectable
     public void SpendStamina(int value)
     {
         _stamina = Mathf.Clamp(_stamina - value, 0, MaxStamina);
-        Debug.Log($"Stamina: {_stamina}/{MaxStamina} for GO {gameObject.name}");
         UIManager.Instance.UpdateStaminaText(_stamina);
 
         _restoreStaminaCoroutine ??= StartCoroutine(RestoreStaminaPeriodically());
@@ -252,9 +255,6 @@ public class Unit : MonoBehaviour, IEffectable
     {
         Vector2 direction = context.ReadValue<Vector2>();
         Vector3 targetPosition = transform.position + new Vector3(direction.x, 0f, direction.y);
-        float clampedX = Mathf.Clamp(targetPosition.x, -UnitsSpawner.Instance.SpawnAreaSize.x, UnitsSpawner.Instance.SpawnAreaSize.x);
-        float clampedZ = Mathf.Clamp(targetPosition.z, -UnitsSpawner.Instance.SpawnAreaSize.z, UnitsSpawner.Instance.SpawnAreaSize.z);
-        targetPosition = new Vector3(clampedX, transform.position.y, clampedZ);
         _abilityZoneGO.transform.position = targetPosition;
     }
 
@@ -277,6 +277,7 @@ public class Unit : MonoBehaviour, IEffectable
         if (_HP == 0)
         {
             Debug.Log($"Unit {gameObject.name} is dead.");
+            AbilitiesManager.Instance.RemoveUnitFromDictionary(name);
             Destroy(gameObject);
         }
     }

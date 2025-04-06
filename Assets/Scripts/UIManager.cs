@@ -54,6 +54,11 @@ public class UIManager : Singleton<UIManager>
         _unitPropertiesPanel.SetActive(false);
         _abilitiesPanel.SetActive(false);
         _keyboardImageGO.SetActive(false);
+        for (int i = 0; i < _abilitiesOnUI.Count; i++)
+        {
+            _abilitiesOnUI[i].Icon.fillAmount = 1;
+        }
+        StopAllCoroutines();
     }
 
     public void UpdateHPText(int hp)

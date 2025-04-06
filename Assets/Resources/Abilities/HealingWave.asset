@@ -13,13 +13,13 @@ MonoBehaviour:
   m_Name: HealingWave
   m_EditorClassIdentifier: 
   AbilityName: HealingWave
-  Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  Sprite: {fileID: 21300000, guid: 9f993d93a1bb4cc4a87b95b1220017d9, type: 3}
   Description: 
   TargetType: 2
   Zone: 2
   AreaOfEffectRadius: 1
-  CustomAreaOfEffectPositioningDuration: 10
-  CastTime: 2
+  CustomAreaOfEffectPositioningDuration: 3
+  CastTime: 5
   ResourceCost: 50
   AffectedResource: 0
   AffectedResourceValue: 10

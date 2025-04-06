@@ -1714,7 +1714,7 @@ MonoBehaviour:
   _unitPropertiesPanel: {fileID: 394825619}
   _xpText: {fileID: 630514688}
   _hpText: {fileID: 86170676}
-  _staminaText: {fileID: 86170676}
+  _staminaText: {fileID: 626537493}
   _abilitiesPanel: {fileID: 721794866}
   _abilitiesOnUI:
   - {fileID: 1294438734}
@@ -3302,15 +3302,9 @@ MonoBehaviour:
   _spawnArea: {fileID: 248068854}
   _firstTeamUnitsCount: 3
   _firstTeamColor: {r: 0, g: 1, b: 0, a: 1}
-  _firstTeamLayer:
-    serializedVersion: 2
-    m_Bits: 64
   _firstTeamParent: {fileID: 458916571}
   _secondTeamUnitsCount: 3
   _secondTeamColor: {r: 1, g: 0, b: 0, a: 1}
-  _secondTeamLayer:
-    serializedVersion: 2
-    m_Bits: 128
   _secondTeamParent: {fileID: 1143466263}
 --- !u!114 &2056462080
 MonoBehaviour:
@@ -3324,11 +3318,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 079a8f306f19811478b8dfcdee4ea20e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _selectableLayers:
-  - serializedVersion: 2
-    m_Bits: 64
-  - serializedVersion: 2
-    m_Bits: 128
   _mainCamera: {fileID: 330585545}
   _selectableTag: Unit
 --- !u!114 &2056462081

@@ -230,6 +230,7 @@ public class AbilityData : ScriptableObject
         UIManager.Instance.StartAbilityCooldown(AbilityName);
 
         yield return new WaitForSeconds(CastTime);
+        AbilitiesManager.Instance.AbilityFinishedAction(AbilityName, context.Caster.name);
         Debug.Log($"Ability {AbilityName} casted by {context.Caster.name}");
     }
 }

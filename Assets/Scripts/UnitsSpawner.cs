@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class UnitsSpawner : Singleton<UnitsSpawner>
 {
@@ -23,6 +25,8 @@ public class UnitsSpawner : Singleton<UnitsSpawner>
     [SerializeField] private Transform _secondTeamParent;
     public List<Unit> SecondTeamUnits { get; private set; } = new List<Unit>();
     public const string SecondTeamUnitName = "SecondTeamUnit_";
+
+    public Action OnSpawnedAction;
 
     public Vector3 SpawnAreaSize => _spawnAreaSize;
     public List<Unit> AllUnits { get; private set; } = new List<Unit>();
@@ -48,6 +52,8 @@ public class UnitsSpawner : Singleton<UnitsSpawner>
         }
         AllUnits.AddRange(FirstTeamUnits);
         AllUnits.AddRange(SecondTeamUnits);
+
+        OnSpawnedAction?.Invoke();
     }
 
     private Unit SpawnUnit(Color color, string team, Transform parent)
