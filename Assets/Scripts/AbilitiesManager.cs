@@ -7,7 +7,7 @@ public class AbilitiesManager : Singleton<AbilitiesManager>
 {
     private List<AbilityData> _abilities = new List<AbilityData>();
     private List<InputAction> _actions = new List<InputAction>();
-    private Dictionary<string, Dictionary<string, bool>> _activeAbilitiesPerUnit = new();
+    private Dictionary<string, Dictionary<string, bool>> _activeAbilitiesPerUnit = new Dictionary<string, Dictionary<string, bool>>();
 
     public Action<string, string> AbilityFinishedAction; //first string - ability name, second string - unitName name
 
@@ -73,11 +73,11 @@ public class AbilitiesManager : Singleton<AbilitiesManager>
             {
                 Unit selectedUnit = UnitSelector.Instance.SelectedGO;
 
-                if (_activeAbilitiesPerUnit.TryGetValue(selectedUnit.name, out var unitAbilities))
+                if (_activeAbilitiesPerUnit.TryGetValue(selectedUnit.name, out Dictionary<string, bool> unitAbilities))
                 {
-                    if (unitAbilities[ability.AbilityName])
+                    if (unitAbilities.ContainsValue(true))
                     {
-                        Debug.Log($"Ability {ability.AbilityName} is already active for unit {selectedUnit.name}");
+                        Debug.Log($"One of abilities is already active for unit {selectedUnit.name}");
                         return;
                     }
 
