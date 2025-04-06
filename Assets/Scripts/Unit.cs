@@ -27,6 +27,7 @@ public class Unit : MonoBehaviour, IEffectable
     [SerializeField] private int _restoreStaminaValue = 1;
     [SerializeField] private int _restoreStaminaDelay = 1;
     private InputAction _moveSelectedAction;
+    private Coroutine _unselectedMoveCoroutine;
     private Coroutine _restoreStaminaCoroutine;
     private bool _isSelected = false;
 
@@ -85,7 +86,11 @@ public class Unit : MonoBehaviour, IEffectable
 
     private void OnSelectAction()
     {
-        StopCoroutine(MoveUnselected());
+        if(_unselectedMoveCoroutine != null)
+        {
+            StopCoroutine(_unselectedMoveCoroutine);
+            _unselectedMoveCoroutine = null;
+        }
         _isSelected = true;
         UIManager.Instance.DeactivateUnitProperties();
         UIManager.Instance.ActivateUnitProperties(_XP, _HP, MaxHP, _stamina, MaxStamina);
@@ -95,7 +100,7 @@ public class Unit : MonoBehaviour, IEffectable
     private void OnDeselectAction()
     {
         _moveSelectedAction.performed -= OnMoveSelected;
-        StartCoroutine(MoveUnselected());
+        _unselectedMoveCoroutine = StartCoroutine(MoveUnselected());
         UIManager.Instance.DeactivateUnitProperties();
         _isSelected = false;
     }
