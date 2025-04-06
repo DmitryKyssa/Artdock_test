@@ -363,6 +363,11 @@ public class Unit : MonoBehaviour, IEffectable
                 yield return wait;
             }
         }
+        else
+        {
+            yield return new WaitForSeconds(statusEffect.Duration);
+            AffectResource(statusEffect.AffectedResource, statusEffect.AffectedResourceValuePerPeriod);
+        }
 
         ((IEffectable)this).RemoveEffect(statusEffect);
     }
