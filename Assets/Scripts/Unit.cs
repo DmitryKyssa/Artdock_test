@@ -86,7 +86,7 @@ public class Unit : MonoBehaviour, IEffectable
 
     private void OnSelectAction()
     {
-        if(_unselectedMoveCoroutine != null)
+        if (_unselectedMoveCoroutine != null)
         {
             StopCoroutine(_unselectedMoveCoroutine);
             _unselectedMoveCoroutine = null;
@@ -263,7 +263,7 @@ public class Unit : MonoBehaviour, IEffectable
             case Zone.AllLocation:
                 _abilityZoneGO.SetActive(true);
                 _abilityZoneGO.transform.position = new Vector3(0f, 0f, 0f);
-                _abilityZoneGO.transform.localScale = new Vector3(UnitsSpawner.Instance.SpawnAreaSize.x, 1f, UnitsSpawner.Instance.SpawnAreaSize.z);
+                _abilityZoneGO.transform.localScale = new Vector3(1f, 1f, 1f);
                 StartCoroutine(DisableZoneAfterDuration(duration));
                 break;
         }
@@ -278,6 +278,11 @@ public class Unit : MonoBehaviour, IEffectable
 
     private IEnumerator DisableZoneAfterDuration(float duration)
     {
+        if (duration == 0f)
+        {
+            duration = 1f;
+        }
+
         yield return new WaitForSeconds(duration);
         _abilityZoneGO.SetActive(false);
         if (_abilityZoneAction.enabled)
