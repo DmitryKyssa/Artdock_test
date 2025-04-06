@@ -26,6 +26,6 @@ MonoBehaviour:
   ReceivedResourceValue: 10
   CooldownAfterUsing: 10
   AnimationDatas: []
-  SFXData: {fileID: 0}
+  SFXData: {fileID: 11400000, guid: 1109a0551d5329d42a493cae3a2f688f, type: 2}
   VFXDatas: []
   StatusEffectData: {fileID: 11400000, guid: e5a4284666298c24e947b2b540041eb7, type: 2}
