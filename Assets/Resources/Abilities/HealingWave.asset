@@ -15,7 +15,7 @@ MonoBehaviour:
   AbilityName: HealingWave
   Sprite: {fileID: 21300000, guid: 9f993d93a1bb4cc4a87b95b1220017d9, type: 3}
   Description: 
-  TargetType: 2
+  TargetType: 4
   Zone: 2
   AreaOfEffectRadius: 0.5
   CustomAreaOfEffectPositioningDuration: 3

@@ -157,7 +157,6 @@ public class AbilityData : ScriptableObject
                 break;
             case TargetType.Enemy or TargetType.Ally:
                 oneTarget.AffectResource(AffectedResource, AffectedResourceValue);
-                Debug.Log($"Ability {AbilityName} casted by {context.Caster.name} on {oneTarget.name}");
                 break;
             case TargetType.Allies:
                 context.Caster.CreateZone(Zone, AreaOfEffectRadius, CustomAreaOfEffectPositioningDuration);
