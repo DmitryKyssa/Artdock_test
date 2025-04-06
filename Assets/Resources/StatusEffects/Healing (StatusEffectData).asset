@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   StatusEffectName: Healing
   Description: Heal
-  TargetType: 2
+  TargetType: 4
   IsEndless: 0
   Duration: 10
   IsPeriodic: 1

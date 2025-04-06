@@ -431,7 +431,7 @@ public class AbilityEditor : EditorWindow
                 }
                 else if (_editedZone == Zone.CustomAreaOfEffect)
                 {
-                    _editedAreaOfEffectRadius = 0f;
+                    _editedAreaOfEffectRadius = EditorGUILayout.FloatField("Area of Effect Radius", _editedAreaOfEffectRadius);
                     _editedCustomAreaOfEffectPositioningDuration = EditorGUILayout.FloatField("Custom Area Positioning Duration", _editedCustomAreaOfEffectPositioningDuration);
                 }
                 else

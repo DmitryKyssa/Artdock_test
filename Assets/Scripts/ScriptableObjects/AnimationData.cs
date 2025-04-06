@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "AnimationData", menuName = "ScriptableObjects/AnimationData", order = 1)]
-public class AnimationData : ScriptableObject
+public class AnimationData : ScriptableObject //no implementation yet
 {
     public AnimationClip AnimationClip;
     public TargetType TargetType;

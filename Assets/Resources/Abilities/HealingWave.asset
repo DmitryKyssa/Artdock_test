@@ -17,8 +17,8 @@ MonoBehaviour:
   Description: 
   TargetType: 4
   Zone: 2
-  AreaOfEffectRadius: 0.5
-  CustomAreaOfEffectPositioningDuration: 3
+  AreaOfEffectRadius: 2
+  CustomAreaOfEffectPositioningDuration: 1
   CastTime: 5
   ResourceCost: 50
   AffectedResource: 0

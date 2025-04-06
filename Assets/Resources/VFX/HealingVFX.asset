@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: HealingVFX
   m_EditorClassIdentifier: 
   Material: {fileID: 2100000, guid: a24e157c94d39c340b9ad1d9c62550fc, type: 2}
-  EffectDuration: 3
+  EffectDuration: 5
   TargetType: 4
