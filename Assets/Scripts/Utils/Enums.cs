@@ -21,9 +21,3 @@ public enum AffectedResourceType
     HP,
     MovementDuration
 }
-
-public enum Condition
-{
-    None,
-    XP
-}

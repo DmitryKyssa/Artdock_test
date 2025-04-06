@@ -73,15 +73,7 @@ public class AbilitiesManager : Singleton<AbilitiesManager>
 
             int index = _abilities.Count - 1;
             InputAction action = new InputAction(ability.AbilityName, InputActionType.Button, "<Keyboard>/" + (index + 1));
-
-            if (ability.Condition == Condition.None)
-            {
-                action.Enable();
-            }
-            else
-            {
-                action.Disable();
-            }
+            action.Enable();
 
             action.performed += context =>
             {

@@ -19,8 +19,6 @@ public class AbilityData : ScriptableObject
     public int AffectedResourceValue;
     public int ReceivedResourceValue;
     public float CooldownAfterUsing;
-    public Condition Condition;
-    public int ConditionValue;
     public List<AnimationData> AnimationDatas = new List<AnimationData>();
     public SFXData SFXData;
     public List<VFXData> VFXDatas = new List<VFXData>();

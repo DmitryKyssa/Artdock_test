@@ -20,8 +20,6 @@ public class AbilityEditor : EditorWindow
     private int _affectedResourceValue;
     private int _receivedResourceValue;
     private float _cooldownAfterUsing;
-    private Condition _condition;
-    private int _conditionValue;
 
     private AudioClip _audioClip;
     private bool _isOffsetFromStart;
@@ -92,12 +90,6 @@ public class AbilityEditor : EditorWindow
 
         _cooldownAfterUsing = EditorGUILayout.FloatField("Cooldown After Using", _cooldownAfterUsing);
 
-        _condition = (Condition)EditorGUILayout.EnumPopup("Condition", _condition);
-        if (_condition != Condition.None)
-        {
-            _conditionValue = EditorGUILayout.IntField("Condition Value", _conditionValue);
-        }
-
         DrawLine();
         SFXDataCreate();
         DrawLine();
@@ -128,8 +120,6 @@ public class AbilityEditor : EditorWindow
             _affectedResourceValue = 0;
             _receivedResourceValue = 0;
             _cooldownAfterUsing = 0f;
-            _condition = Condition.None;
-            _conditionValue = 0;
 
             _sfxData = null;
             _audioClip = null;
@@ -424,8 +414,6 @@ public class AbilityEditor : EditorWindow
         _abilityForSaving.AffectedResourceValue = _affectedResourceValue;
         _abilityForSaving.ReceivedResourceValue = _receivedResourceValue;
         _abilityForSaving.CooldownAfterUsing = _cooldownAfterUsing;
-        _abilityForSaving.Condition = _condition;
-        _abilityForSaving.ConditionValue = _conditionValue;
         for (int i = 0; i < _animationDatas.Count; i++)
         {
             _abilityForSaving.AnimationDatas.Add(_animationDatas[i]);
