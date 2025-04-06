@@ -184,7 +184,7 @@ public class AbilityData : ScriptableObject
                         }
                         break;
                     case TargetType.Enemies:
-                        foreach (Unit enemy in allies)
+                        foreach (Unit enemy in enemies)
                         {
                             CoroutineRunner.Instance.Run(vfxData.PlayVFX(enemy));
                         }
@@ -194,7 +194,7 @@ public class AbilityData : ScriptableObject
                         {
                             CoroutineRunner.Instance.Run(vfxData.PlayVFX(ally));
                         }
-                        foreach (Unit enemy in allies)
+                        foreach (Unit enemy in enemies)
                         {
                             CoroutineRunner.Instance.Run(vfxData.PlayVFX(enemy));
                         }
