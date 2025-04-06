@@ -240,6 +240,7 @@ public class Unit : MonoBehaviour, IEffectable
                 _abilityZoneGO.transform.localScale = new Vector3(area, area, area);
                 _abilityZoneAction.Enable();
                 StartCoroutine(DisableZoneAfterDuration(duration));
+                UIManager.Instance.ShowArrowsImage(true);
                 _abilityZoneAction.performed += OnZoneMove;
                 break;
             case Zone.AllLocation:
@@ -266,6 +267,7 @@ public class Unit : MonoBehaviour, IEffectable
         {
             _abilityZoneAction.performed -= OnZoneMove;
             _abilityZoneAction.Disable();
+            UIManager.Instance.ShowArrowsImage(false);
         }
     }
 

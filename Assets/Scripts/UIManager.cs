@@ -21,6 +21,7 @@ public class UIManager : Singleton<UIManager>
     [SerializeField] private GameObject _abilitiesPanel;
     [SerializeField] private List<AbilityOnUI> _abilitiesOnUI = new List<AbilityOnUI>();
     [SerializeField] private GameObject _keyboardImageGO;
+    [SerializeField] private GameObject _arrowsImageGO;
 
     public List<AbilityOnUI> AbilitiesOnUI { get => _abilitiesOnUI; set => _abilitiesOnUI = value; }
 
@@ -74,6 +75,11 @@ public class UIManager : Singleton<UIManager>
     public void UpdateXPText(int xp)
     {
         _xpText.text = XPText + xp;
+    }
+
+    public void ShowArrowsImage(bool show)
+    {
+        _arrowsImageGO.SetActive(show);
     }
 
     public void StartAbilityCooldown(string abilityName)
