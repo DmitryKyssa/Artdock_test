@@ -27,5 +27,7 @@ MonoBehaviour:
   CooldownAfterUsing: 20
   AnimationDatas: []
   SFXData: {fileID: 11400000, guid: 40a521448cfa15b4ea47b8b5e8710e7b, type: 2}
-  VFXDatas: []
+  VFXDatas:
+  - {fileID: 11400000, guid: 58452735bacbf9d42aff7d1b6f2ef677, type: 2}
+  - {fileID: 11400000, guid: 1a28f50becb608b4d9e1e4004888d06c, type: 2}
   StatusEffectData: {fileID: 11400000, guid: e5b4e63bcabdf9240b1c84c9aa524bdf, type: 2}

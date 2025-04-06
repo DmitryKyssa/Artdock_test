@@ -36,9 +36,8 @@ public class AbilityEditor : EditorWindow
     private StatusEffectData _statusEffectData;
 
     private List<VFXData> _vfxDatas = new List<VFXData>();
-    private ParticleSystem _particleSystem;
-    private bool _isOffsetFromStartVFX;
-    private float _offsetFromStartVFX;
+    private Material _material;
+    private float _effectDuration;
     private TargetType _vfxTargetType;
     private VFXData _fromSavedVFXData;
 
@@ -146,9 +145,8 @@ public class AbilityEditor : EditorWindow
             _animationTargetType = TargetType.Self;
 
             _vfxDatas.Clear();
-            _particleSystem = null;
-            _isOffsetFromStartVFX = false;
-            _offsetFromStartVFX = 0f;
+            _material = null;
+            _effectDuration = 0f;
         }
     }
 
@@ -172,7 +170,8 @@ public class AbilityEditor : EditorWindow
 
         for (int i = 0; i < _vfxDatas.Count; i++)
         {
-            _vfxDatas[i].ParticleSystem = (ParticleSystem)EditorGUILayout.ObjectField("Particle System", _vfxDatas[i].ParticleSystem, typeof(ParticleSystem), false);
+            _vfxDatas[i].Material = EditorGUILayout.ObjectField("Material", _vfxDatas[i].Material, typeof(Material), false) as Material;
+            _vfxDatas[i].EffectDuration = EditorGUILayout.FloatField("Effect Duration", _vfxDatas[i].EffectDuration);
             _vfxDatas[i].TargetType = (TargetType)EditorGUILayout.EnumPopup("VFX Target Type", _vfxDatas[i].TargetType);
 
             if (GUILayout.Button("Remove"))
@@ -210,10 +209,9 @@ public class AbilityEditor : EditorWindow
         void OneElementCreate()
         {
             VFXData vfxData = CreateInstance<VFXData>();
-            vfxData.ParticleSystem = _particleSystem;
+            vfxData.Material = _material;
+            vfxData.EffectDuration = _effectDuration;
             vfxData.TargetType = _vfxTargetType;
-            vfxData.IsOffsetFromStart = _isOffsetFromStartVFX;
-            vfxData.OffsetFromStart = _offsetFromStartVFX;
             _vfxDatas.Add(vfxData);
         }
     }

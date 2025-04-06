@@ -43,6 +43,7 @@ public class Unit : MonoBehaviour, IEffectable
     public Transform VfxCastPoint => _vfxCastPoint;
     public int Stamina => _stamina;
     public Vector3 ZonePosition => _abilityZoneGO.transform.position;
+    public MeshRenderer MeshRenderer => _meshRenderer;
 
     private void Awake()
     {
