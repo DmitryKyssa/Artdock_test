@@ -83,17 +83,9 @@ public class Unit : MonoBehaviour, IEffectable
         _moveSelectedAction.Disable();
     }
 
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.CompareTag(UnitSelector.Instance.SelectableTag))
-        {
-            Debug.Log($"Collision with {collision.gameObject.name}");
-        }
-    }
-
     private void OnSelectAction()
     {
-        StopAllCoroutines();
+        StopCoroutine(MoveUnselected());
         _isSelected = true;
         UIManager.Instance.DeactivateUnitProperties();
         UIManager.Instance.ActivateUnitProperties(_XP, _HP, MaxHP, _stamina, MaxStamina);
@@ -155,13 +147,14 @@ public class Unit : MonoBehaviour, IEffectable
 
             while (true)
             {
-                float t = (Time.time - startTime) / _moveDuration;
+                float t = Mathf.Clamp01((Time.time - startTime) / _moveDuration);
+                transform.position = Vector3.Lerp(startPosition, targetPosition, t);
+
                 if (t >= 1f)
                 {
                     break;
                 }
 
-                transform.position = Vector3.Lerp(startPosition, targetPosition, t);
                 yield return null;
             }
 
