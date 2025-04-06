@@ -5,9 +5,7 @@ using UnityEngine.InputSystem;
 
 public class AbilitiesManager : Singleton<AbilitiesManager>
 {
-    [SerializeField] private bool _loadFromResources = true;
-    [SerializeField] private List<AbilityData> _abilities = new List<AbilityData>();
-
+    private List<AbilityData> _abilities = new List<AbilityData>();
     private List<InputAction> _actions = new List<InputAction>();
     private Dictionary<string, Dictionary<string, bool>> _activeAbilitiesPerUnit = new();
 
@@ -17,11 +15,8 @@ public class AbilitiesManager : Singleton<AbilitiesManager>
     {
         base.Awake();
 
-        if (_loadFromResources)
-        {
-            LoadAbilities();
-            SetAbilitiesForUI();
-        }
+        LoadAbilities();
+        SetAbilitiesForUI();
 
         AbilityFinishedAction += (abilityName, unit) =>
         {
@@ -71,8 +66,7 @@ public class AbilitiesManager : Singleton<AbilitiesManager>
 
             _abilities.Add(ability);
 
-            int index = _abilities.Count - 1;
-            InputAction action = new InputAction(ability.AbilityName, InputActionType.Button, "<Keyboard>/" + (index + 1));
+            InputAction action = new InputAction(ability.AbilityName, InputActionType.Button, "<Keyboard>/" + (_abilities.Count));
             action.Enable();
 
             action.performed += context =>
@@ -124,5 +118,21 @@ public class AbilitiesManager : Singleton<AbilitiesManager>
             abilityOnUI.SetUpIcon();
             abilityOnUI.KeyText.text = $"'{i + 1}'";
         }
+    }
+
+    private void OnDestroy()
+    {
+        foreach (var action in _actions)
+        {
+            action.Disable();
+            action.Dispose();
+        }
+
+        foreach (var unitAbilities in _activeAbilitiesPerUnit.Values)
+        {
+            unitAbilities.Clear();
+        }
+
+        _activeAbilitiesPerUnit.Clear();
     }
 }
