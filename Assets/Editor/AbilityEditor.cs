@@ -7,9 +7,10 @@ using UnityEngine;
 
 public class AbilityEditor : EditorWindow
 {
+    //new ability
     private string _abilityName = "New Ability";
     private Sprite _sprite;
-    private string _description;
+    private string _description = "Ability description";
     private TargetType _targetType;
     private Zone _zone;
     private float _areaOfEffectRadius;
@@ -24,6 +25,8 @@ public class AbilityEditor : EditorWindow
     private AudioClip _audioClip;
     private bool _isOffsetFromStart;
     private float _offsetFromStart;
+    private SFXData _sfxData;
+    private SFXData _fromSavedSFXData;
 
     private List<AnimationData> _animationDatas = new List<AnimationData>();
     private AnimationClip _animationClip;
@@ -32,9 +35,6 @@ public class AbilityEditor : EditorWindow
 
     private StatusEffectData _statusEffectData;
 
-    private SFXData _sfxData;
-    private SFXData _fromSavedSFXData;
-
     private List<VFXData> _vfxDatas = new List<VFXData>();
     private ParticleSystem _particleSystem;
     private bool _isOffsetFromStartVFX;
@@ -42,8 +42,23 @@ public class AbilityEditor : EditorWindow
     private TargetType _vfxTargetType;
     private VFXData _fromSavedVFXData;
 
-    private string _newAbilityName = "Rename ability";
-    private AbilityData _selectedAbility;
+    //edit ability
+    private string _editedAbilityName = "Rename ability";
+    private Sprite _editedSprite;
+    private string _editedAbilityDescription = "Edit ability description";
+    private TargetType _editedTargetType;
+    private Zone _editedZone;
+    private float _editedAreaOfEffectRadius;
+    private float _editedCustomAreaOfEffectPositioningDuration;
+    private float _editedCastTime;
+    private int _editedResourceCost;
+    private AffectedResourceType _editedAffectedResource;
+    private int _editedAffectedResourceValue;
+    private int _editedReceivedResourceValue;
+    private float _editedCooldownAfterUsing;
+
+    private AbilityData _editingAbility;
+    private bool _hasLoadedAbilityFields = false;
 
     private Vector2 _scrollPosition = Vector2.zero;
     private AbilityData _abilityForSaving;
@@ -344,11 +359,96 @@ public class AbilityEditor : EditorWindow
     {
         GUILayout.Label("Edit an existing Ability", EditorStyles.boldLabel);
 
-        _selectedAbility = (AbilityData)EditorGUILayout.ObjectField("New ability name", _selectedAbility, typeof(AbilityData), false);
+        AbilityData selectedAbility = (AbilityData)EditorGUILayout.ObjectField("SO for editing", _editingAbility, typeof(AbilityData), false);
 
-        if (_selectedAbility != null)
+        if (selectedAbility != _editingAbility)
         {
-            _newAbilityName = EditorGUILayout.TextField("Ability Name", _newAbilityName);
+            _editingAbility = selectedAbility;
+            _hasLoadedAbilityFields = false;
+        }
+
+        if (_editingAbility != null)
+        {
+            if (!_hasLoadedAbilityFields)
+            {
+                _editedAbilityName = _editingAbility.AbilityName;
+                _editedSprite = _editingAbility.Sprite;
+                _editedAbilityDescription = _editingAbility.Description;
+                _editedTargetType = _editingAbility.TargetType;
+                _editedZone = _editingAbility.Zone;
+                _editedAreaOfEffectRadius = _editingAbility.AreaOfEffectRadius;
+                _editedCustomAreaOfEffectPositioningDuration = _editingAbility.CustomAreaOfEffectPositioningDuration;
+                _editedCastTime = _editingAbility.CastTime;
+                _editedResourceCost = _editingAbility.ResourceCost;
+                _editedAffectedResource = _editingAbility.AffectedResource;
+                _editedAffectedResourceValue = _editingAbility.AffectedResourceValue;
+                _editedReceivedResourceValue = _editingAbility.ReceivedResourceValue;
+                _editedCooldownAfterUsing = _editingAbility.CooldownAfterUsing;
+
+                _hasLoadedAbilityFields = true;
+            }
+
+            _editedAbilityName = EditorGUILayout.TextField("Ability Name", _editedAbilityName);
+
+            EditorGUILayout.LabelField("Description", EditorStyles.label);
+            _editedAbilityDescription = EditorGUILayout.TextArea(_editedAbilityDescription, GUILayout.Height(60));
+
+            _editedSprite = (Sprite)EditorGUILayout.ObjectField("Ability Sprite", _editedSprite, typeof(Sprite), false);
+
+            _editedTargetType = (TargetType)EditorGUILayout.EnumPopup("Target Type", _editedTargetType);
+
+            if (_editedTargetType == TargetType.Self ||
+                _editedTargetType == TargetType.Ally ||
+                _editedTargetType == TargetType.Enemy)
+            {
+                _editedZone = Zone.SingleTarget;
+                _editedAreaOfEffectRadius = 0f;
+                _editedCustomAreaOfEffectPositioningDuration = 0f;
+            }
+            else if (_editedTargetType == TargetType.All)
+            {
+                _editedZone = Zone.AllLocation;
+                _editedAreaOfEffectRadius = 0f;
+                _editedCustomAreaOfEffectPositioningDuration = 0f;
+            }
+            else
+            {
+                Zone[] allowedValues = Enum.GetValues(typeof(Zone))
+                    .Cast<Zone>()
+                    .Where(value => value != Zone.SingleTarget)
+                    .ToArray();
+
+                int selectedIndex = Array.IndexOf(allowedValues, _editedZone);
+                if (selectedIndex == -1)
+                {
+                    selectedIndex = 0;
+                }
+                selectedIndex = EditorGUILayout.Popup("Effect Zone", selectedIndex, allowedValues.Select(v => v.ToString()).ToArray());
+                _editedZone = allowedValues[selectedIndex];
+
+                if (_editedZone == Zone.AllLocation)
+                {
+                    _editedAreaOfEffectRadius = 0f;
+                    _editedCustomAreaOfEffectPositioningDuration = 0f;
+                }
+                else if (_editedZone == Zone.CustomAreaOfEffect)
+                {
+                    _editedAreaOfEffectRadius = 0f;
+                    _editedCustomAreaOfEffectPositioningDuration = EditorGUILayout.FloatField("Custom Area Positioning Duration", _editedCustomAreaOfEffectPositioningDuration);
+                }
+                else
+                {
+                    _editedAreaOfEffectRadius = EditorGUILayout.FloatField("Area of Effect Radius", _editedAreaOfEffectRadius);
+                    _editedCustomAreaOfEffectPositioningDuration = 0f;
+                }
+            }
+
+            _editedCastTime = EditorGUILayout.FloatField("Cast Time", _editedCastTime);
+            _editedResourceCost = EditorGUILayout.IntField("Resource Cost", _editedResourceCost);
+            _editedAffectedResource = (AffectedResourceType)EditorGUILayout.EnumPopup("Affected Resource", _editedAffectedResource);
+            _editedAffectedResourceValue = EditorGUILayout.IntField("Affected Resource Value", _editedAffectedResourceValue);
+            _editedReceivedResourceValue = EditorGUILayout.IntField("Received Resource Value", _editedReceivedResourceValue);
+            _editedCooldownAfterUsing = EditorGUILayout.FloatField("Cooldown After Using", _editedCooldownAfterUsing);
 
             if (GUILayout.Button("Save Ability"))
             {
@@ -359,24 +459,37 @@ public class AbilityEditor : EditorWindow
 
     private void SaveAbilityAction()
     {
-        if (_selectedAbility == null)
+        if (_editingAbility == null)
         {
             Debug.LogWarning("No ability selected!");
             return;
         }
 
-        string path = AssetDatabase.GetAssetPath(_selectedAbility);
+        string path = AssetDatabase.GetAssetPath(_editingAbility);
         if (string.IsNullOrEmpty(path))
         {
             Debug.LogError("Could not find the asset path for selected ability!");
             return;
         }
 
-        string newPath = Path.Combine(Path.GetDirectoryName(path), _newAbilityName + ".asset");
+        _editingAbility.AbilityName = _editedAbilityName;
+        _editingAbility.Sprite = _editedSprite;
+        _editingAbility.Description = _editedAbilityDescription;
+        _editingAbility.TargetType = _editedTargetType;
+        _editingAbility.Zone = _editedZone;
+        _editingAbility.AreaOfEffectRadius = _editedAreaOfEffectRadius;
+        _editingAbility.CustomAreaOfEffectPositioningDuration = _editedCustomAreaOfEffectPositioningDuration;
+        _editingAbility.CastTime = _editedCastTime;
+        _editingAbility.ResourceCost = _editedResourceCost;
+        _editingAbility.AffectedResource = _editedAffectedResource;
+        _editingAbility.AffectedResourceValue = _editedAffectedResourceValue;
+        _editingAbility.ReceivedResourceValue = _editedReceivedResourceValue;
+        _editingAbility.CooldownAfterUsing = _editedCooldownAfterUsing;
+
+        string newPath = Path.Combine(Path.GetDirectoryName(path), _editedAbilityName + ".asset");
         if (path != newPath)
         {
-            string renameResult = AssetDatabase.RenameAsset(path, _newAbilityName);
-            _selectedAbility.AbilityName = _newAbilityName;
+            string renameResult = AssetDatabase.RenameAsset(path, _editedAbilityName);
             if (!string.IsNullOrEmpty(renameResult))
             {
                 Debug.LogError($"Failed to rename asset: {renameResult}");
@@ -384,14 +497,15 @@ public class AbilityEditor : EditorWindow
             }
         }
 
-        EditorUtility.SetDirty(_selectedAbility);
+        EditorUtility.SetDirty(_editingAbility);
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
         Selection.activeObject = null;
-        Selection.activeObject = _selectedAbility;
+        Selection.activeObject = _editingAbility;
+        _hasLoadedAbilityFields = false;
 
-        Debug.Log($"Ability {_selectedAbility.AbilityName} saved.");
+        Debug.Log($"Ability {_editingAbility.AbilityName} saved.");
     }
 
     private void CreateAbilityAction()

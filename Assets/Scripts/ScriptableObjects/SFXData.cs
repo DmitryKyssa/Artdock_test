@@ -1,11 +1,12 @@
 using System.Collections;
 using UnityEngine;
 
+[CreateAssetMenu(fileName = "SFXData", menuName = "ScriptableObjects/SFXData", order = 1)]
 public class SFXData : ScriptableObject
 {
-    [ReadOnly] public AudioClip AudioClip;
-    [ReadOnly] public bool IsOffsetFromStart;
-    [ReadOnly] public float OffsetFromStart;
+    public AudioClip AudioClip;
+    public bool IsOffsetFromStart;
+    public float OffsetFromStart;
 
     public IEnumerator PlaySFX(Unit unit)
     {

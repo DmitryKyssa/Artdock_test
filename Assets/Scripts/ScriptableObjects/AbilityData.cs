@@ -9,10 +9,10 @@ public class AbilityData : ScriptableObject
     [ReadOnly] public string AbilityName;
     public Sprite Sprite;
     [Multiline] public string Description;
-    public TargetType TargetType;
-    public Zone Zone;
-    public float AreaOfEffectRadius;
-    public float CustomAreaOfEffectPositioningDuration;
+    [ReadOnly] public TargetType TargetType;
+    [ReadOnly] public Zone Zone;
+    [ReadOnly] public float AreaOfEffectRadius;
+    [ReadOnly] public float CustomAreaOfEffectPositioningDuration;
     public float CastTime;
     public int ResourceCost;
     public AffectedResourceType AffectedResource;

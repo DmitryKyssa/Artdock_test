@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
+[CreateAssetMenu(fileName = "VFXData", menuName = "ScriptableObjects/VFXData", order = 1)]
 public class VFXData : ScriptableObject
 {
     public ParticleSystem ParticleSystem;
