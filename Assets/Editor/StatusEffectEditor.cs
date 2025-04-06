@@ -11,9 +11,9 @@ public class StatusEffectEditor : EditorWindow
     private bool _isPeriodic;
     private float _period;
     private AffectedResourceType _affectedResource;
-    private int _affectedResourceValuePerPeriod;
+    private float _affectedResourceValuePerPeriod;
 
-    [MenuItem("Window/Status Effect Editor")]
+    [MenuItem("Tools/Status Effect Editor")]
     public static void ShowWindow()
     {
         GetWindow<StatusEffectEditor>("Status Effect Editor");
@@ -41,7 +41,7 @@ public class StatusEffectEditor : EditorWindow
             _period = EditorGUILayout.FloatField("Period", _period);
         }
         _affectedResource = (AffectedResourceType)EditorGUILayout.EnumPopup("Affected Resource", _affectedResource);
-        _affectedResourceValuePerPeriod = EditorGUILayout.IntField("Affected Resource Value Per Period", _affectedResourceValuePerPeriod);
+        _affectedResourceValuePerPeriod = EditorGUILayout.FloatField("Affected Resource Value Per Period", _affectedResourceValuePerPeriod);
 
         if (GUILayout.Button("Create Status Effect"))
         {

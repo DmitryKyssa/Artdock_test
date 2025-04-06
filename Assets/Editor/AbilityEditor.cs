@@ -50,7 +50,7 @@ public class AbilityEditor : EditorWindow
     private Vector2 _scrollPosition = Vector2.zero;
     private AbilityData _abilityForSaving;
 
-    [MenuItem("Window/Ability Editor")]
+    [MenuItem("Tools/Ability Editor")]
     public static void ShowWindow()
     {
         GetWindow<AbilityEditor>("Ability Editor");
@@ -303,21 +303,25 @@ public class AbilityEditor : EditorWindow
     private void TargetAndEffectZone()
     {
         _targetType = (TargetType)EditorGUILayout.EnumPopup("Target Type", _targetType);
-        if (_targetType == TargetType.Self)
+        if (_targetType == TargetType.Self ||
+            _targetType == TargetType.Ally ||
+            _targetType == TargetType.Enemy)
         {
             _zone = Zone.SingleTarget;
             _areaOfEffectRadius = 0f;
+            _customAreaOfEffectPositioningDuration = 0f;
         }
         else if (_targetType == TargetType.All)
         {
             _zone = Zone.AllLocation;
             _areaOfEffectRadius = 0f;
+            _customAreaOfEffectPositioningDuration = 0f;
         }
         else
         {
             Zone[] allowedValues = Enum.GetValues(typeof(Zone))
                 .Cast<Zone>()
-                .Where(value => value != Zone.SingleTarget && value != Zone.AllLocation)
+                .Where(value => value != Zone.SingleTarget)
                 .ToArray();
 
             int selectedIndex = Array.IndexOf(allowedValues, _zone);
@@ -327,11 +331,21 @@ public class AbilityEditor : EditorWindow
             }
             selectedIndex = EditorGUILayout.Popup("Effect Zone", selectedIndex, allowedValues.Select(v => v.ToString()).ToArray());
             _zone = allowedValues[selectedIndex];
-            _areaOfEffectRadius = EditorGUILayout.FloatField("Area of Effect Radius", _areaOfEffectRadius);
 
-            if (_zone == Zone.CustomAreaOfEffect)
+            if(_zone == Zone.AllLocation)
             {
+                _areaOfEffectRadius = 0f;
+                _customAreaOfEffectPositioningDuration = 0f;
+            } 
+            else if (_zone == Zone.CustomAreaOfEffect)
+            {
+                _areaOfEffectRadius = 0f;
                 _customAreaOfEffectPositioningDuration = EditorGUILayout.FloatField("Custom Area Positioning Duration", _customAreaOfEffectPositioningDuration);
+            }
+            else
+            {
+                _areaOfEffectRadius = EditorGUILayout.FloatField("Area of Effect Radius", _areaOfEffectRadius);
+                _customAreaOfEffectPositioningDuration = 0f;
             }
         }
     }

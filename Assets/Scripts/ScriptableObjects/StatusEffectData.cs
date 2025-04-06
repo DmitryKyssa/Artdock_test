@@ -10,5 +10,5 @@ public class StatusEffectData: ScriptableObject
     public bool IsPeriodic;
     public float Period;
     public AffectedResourceType AffectedResource;
-    public int AffectedResourceValuePerPeriod;
+    public float AffectedResourceValuePerPeriod;
 }

@@ -1,6 +1,8 @@
 public enum TargetType
 {
     Self,
+    Enemy,
+    Ally,
     Enemies,
     Allies,
     All
@@ -17,7 +19,7 @@ public enum Zone
 public enum AffectedResourceType
 {
     HP,
-    MovementSpeed
+    MovementDuration
 }
 
 public enum Condition

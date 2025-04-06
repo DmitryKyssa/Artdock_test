@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class AbilityData : ScriptableObject
 {
@@ -54,6 +55,16 @@ public class AbilityData : ScriptableObject
 
         context.Caster.DeductResource(ResourceCost);
 
+        Unit oneTarget = null;
+        if (TargetType == TargetType.Enemy)
+        {
+            oneTarget = enemies[Random.Range(0, enemies.Count)];
+        }
+        else if (TargetType == TargetType.Ally)
+        {
+            oneTarget = allies[Random.Range(0, allies.Count)];
+        }
+
         if (AnimationDatas != null && AnimationDatas.Count > 0)
         {
             foreach (AnimationData animationData in AnimationDatas)
@@ -62,6 +73,9 @@ public class AbilityData : ScriptableObject
                 {
                     case TargetType.Self:
                         animationData.PlayAnimation(context.Caster);
+                        break;
+                    case TargetType.Enemy or TargetType.Ally:
+                        animationData.PlayAnimation(oneTarget);
                         break;
                     case TargetType.Allies:
                         foreach (Unit ally in allies)
@@ -100,6 +114,9 @@ public class AbilityData : ScriptableObject
                     case TargetType.Self:
                         CoroutineRunner.Instance.Run(vfxData.PlayVFX(context.Caster));
                         break;
+                    case TargetType.Enemy or TargetType.Ally:
+                        CoroutineRunner.Instance.Run(vfxData.PlayVFX(oneTarget));
+                        break;
                     case TargetType.Allies:
                         foreach (Unit ally in allies)
                         {
@@ -134,11 +151,15 @@ public class AbilityData : ScriptableObject
         }
 
         context.Caster.ReceivedResource(ReceivedResourceValue);
-
+        
         switch (TargetType)
         {
             case TargetType.Self:
                 context.Caster.AffectResource(AffectedResource, AffectedResourceValue);
+                break;
+            case TargetType.Enemy or TargetType.Ally:
+                oneTarget.AffectResource(AffectedResource, AffectedResourceValue);
+                Debug.Log($"Ability {AbilityName} casted by {context.Caster.name} on {oneTarget.name}");
                 break;
             case TargetType.Allies:
                 context.Caster.CreateZone(Zone, AreaOfEffectRadius, CustomAreaOfEffectPositioningDuration);
@@ -148,7 +169,7 @@ public class AbilityData : ScriptableObject
                 }
                 foreach (Unit ally in allies)
                 {
-                    if (Vector3.Distance(context.Caster.ZonePosition, ally.transform.position) <= AreaOfEffectRadius)
+                    if (AreaOfEffectRadius == 0 || Vector3.Distance(context.Caster.ZonePosition, ally.transform.position) <= AreaOfEffectRadius)
                     {
                         ally.AffectResource(AffectedResource, AffectedResourceValue);
                     }
@@ -162,7 +183,7 @@ public class AbilityData : ScriptableObject
                 }
                 foreach (Unit enemy in enemies)
                 {
-                    if (Vector3.Distance(context.Caster.ZonePosition, enemy.transform.position) <= AreaOfEffectRadius)
+                    if (AreaOfEffectRadius == 0 || Vector3.Distance(context.Caster.ZonePosition, enemy.transform.position) <= AreaOfEffectRadius)
                     {
                         enemy.AffectResource(AffectedResource, AffectedResourceValue);
                     }
@@ -176,7 +197,7 @@ public class AbilityData : ScriptableObject
                 }
                 foreach (Unit ally in allies)
                 {
-                    if (Vector3.Distance(context.Caster.ZonePosition, ally.transform.position) <= AreaOfEffectRadius)
+                    if (AreaOfEffectRadius == 0 || Vector3.Distance(context.Caster.ZonePosition, ally.transform.position) <= AreaOfEffectRadius)
                     {
                         ally.AffectResource(AffectedResource, AffectedResourceValue);
                     }
@@ -193,12 +214,32 @@ public class AbilityData : ScriptableObject
                 throw new ArgumentOutOfRangeException(nameof(TargetType), TargetType, null);
         }
 
+        UIManager.Instance.StartAbilityCooldown(AbilityName);
+
+        yield return new WaitForSeconds(CastTime);
+        AbilitiesManager.Instance.AbilityFinishedAction(AbilityName, context.Caster.name);
+
         if (StatusEffectData != null)
         {
             switch (StatusEffectData.TargetType)
             {
                 case TargetType.Self:
                     context.Caster.ApplyEffect(StatusEffectData);
+                    break;
+                case TargetType.Enemy or TargetType.Ally:
+                    if (oneTarget == null)
+                    {
+                        if (TargetType == TargetType.Enemy)
+                        {
+                            oneTarget = enemies[Random.Range(0, enemies.Count)];
+                        }
+                        else if (TargetType == TargetType.Ally)
+                        {
+                            oneTarget = allies[Random.Range(0, allies.Count)];
+                        }
+                    }
+
+                    oneTarget.ApplyEffect(StatusEffectData);
                     break;
                 case TargetType.Allies:
                     foreach (Unit ally in allies)
@@ -227,10 +268,6 @@ public class AbilityData : ScriptableObject
             }
         }
 
-        UIManager.Instance.StartAbilityCooldown(AbilityName);
-
-        yield return new WaitForSeconds(CastTime);
-        AbilitiesManager.Instance.AbilityFinishedAction(AbilityName, context.Caster.name);
         Debug.Log($"Ability {AbilityName} casted by {context.Caster.name}");
     }
 }

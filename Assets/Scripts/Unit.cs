@@ -28,6 +28,7 @@ public class Unit : MonoBehaviour, IEffectable
     [SerializeField] private int _restoreStaminaDelay = 1;
     private InputAction _moveSelectedAction;
     private Coroutine _restoreStaminaCoroutine;
+    private bool _isSelected = false;
 
     [SerializeField] private GameObject _abilityZoneGO;
     private InputAction _abilityZoneAction;
@@ -93,6 +94,7 @@ public class Unit : MonoBehaviour, IEffectable
     private void OnSelectAction()
     {
         StopAllCoroutines();
+        _isSelected = true;
         UIManager.Instance.DeactivateUnitProperties();
         UIManager.Instance.ActivateUnitProperties(_XP, _HP, MaxHP, _stamina, MaxStamina);
         _moveSelectedAction.performed += OnMoveSelected;
@@ -103,6 +105,7 @@ public class Unit : MonoBehaviour, IEffectable
         _moveSelectedAction.performed -= OnMoveSelected;
         StartCoroutine(MoveUnselected());
         UIManager.Instance.DeactivateUnitProperties();
+        _isSelected = false;
     }
 
     private void OnMoveSelected(InputAction.CallbackContext context)
@@ -128,7 +131,7 @@ public class Unit : MonoBehaviour, IEffectable
                 {
                     if (hit.collider.CompareTag(UnitSelector.Instance.SelectableTag))
                     {
-                        continue; 
+                        continue;
                     }
                 }
 
@@ -148,14 +151,20 @@ public class Unit : MonoBehaviour, IEffectable
 
             Vector3 targetPosition = new Vector3(clampedX, transform.position.y, clampedZ);
             Vector3 startPosition = transform.position;
-            float elapsedTime = 0f;
+            float startTime = Time.time;
 
-            while (elapsedTime < _moveDuration)
+            while (true)
             {
-                transform.position = Vector3.Lerp(startPosition, targetPosition, elapsedTime / _moveDuration);
-                elapsedTime += Time.deltaTime;
+                float t = (Time.time - startTime) / _moveDuration;
+                if (t >= 1f)
+                {
+                    break;
+                }
+
+                transform.position = Vector3.Lerp(startPosition, targetPosition, t);
                 yield return null;
             }
+
 
             transform.position = targetPosition;
             yield return new WaitForSeconds(_moveDelay);
@@ -175,16 +184,23 @@ public class Unit : MonoBehaviour, IEffectable
     public void AddXP(int value)
     {
         _XP += value;
-        UIManager.Instance.UpdateXPText(_XP);
+        if (_isSelected)
+        {
+            UIManager.Instance.UpdateXPText(_XP);
+        }
     }
 
     private IEnumerator RestoreStaminaPeriodically()
     {
+        WaitForSeconds wait = new WaitForSeconds(_restoreStaminaDelay);
         while (_stamina < MaxStamina)
         {
             _stamina = Mathf.Clamp(_stamina + _restoreStaminaValue, 0, MaxStamina);
-            UIManager.Instance.UpdateStaminaText(_stamina);
-            yield return new WaitForSeconds(_restoreStaminaDelay);
+            if (_isSelected)
+            {
+                UIManager.Instance.UpdateStaminaText(_stamina);
+            }
+            yield return wait;
         }
 
         _restoreStaminaCoroutine = null;
@@ -193,7 +209,10 @@ public class Unit : MonoBehaviour, IEffectable
     public void SpendStamina(int value)
     {
         _stamina = Mathf.Clamp(_stamina - value, 0, MaxStamina);
-        UIManager.Instance.UpdateStaminaText(_stamina);
+        if (_isSelected)
+        {
+            UIManager.Instance.UpdateStaminaText(_stamina);
+        }
 
         _restoreStaminaCoroutine ??= StartCoroutine(RestoreStaminaPeriodically());
     }
@@ -203,15 +222,15 @@ public class Unit : MonoBehaviour, IEffectable
         SpendStamina(value);
     }
 
-    public void AffectResource(AffectedResourceType affectedResource, int value)
+    public void AffectResource(AffectedResourceType affectedResource, float value)
     {
         switch (affectedResource)
         {
             case AffectedResourceType.HP:
-                ChangeHP(value);
+                ChangeHP((int)value);
                 break;
-            case AffectedResourceType.MovementSpeed:
-                _moveDuration = Mathf.Infinity;
+            case AffectedResourceType.MovementDuration:
+                _moveDuration += value;
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(affectedResource), affectedResource, null);
@@ -274,7 +293,11 @@ public class Unit : MonoBehaviour, IEffectable
     private void ChangeHP(int value)
     {
         _HP = Mathf.Clamp(_HP + value, 0, MaxHP);
-        UIManager.Instance.UpdateHPText(_HP);
+        Debug.Log($"Unit {gameObject.name} HP changed to {_HP}");
+        if (_isSelected)
+        {
+            UIManager.Instance.UpdateHPText(_HP);
+        }
 
         if (_HP == 0)
         {
@@ -317,21 +340,23 @@ public class Unit : MonoBehaviour, IEffectable
 
     private IEnumerator ApplyEndlessEffect(StatusEffectData statusEffect)
     {
+        WaitForSeconds wait = new WaitForSeconds(statusEffect.Period);
         while (true)
         {
             AffectResource(statusEffect.AffectedResource, statusEffect.AffectedResourceValuePerPeriod);
-            yield return new WaitForSeconds(statusEffect.Period);
+            yield return wait;
         }
     }
 
     private IEnumerator ApplyTimedEffect(StatusEffectData statusEffect)
     {
+        WaitForSeconds wait = new WaitForSeconds(statusEffect.Period);
         if (statusEffect.IsPeriodic)
         {
             for (int i = 0; i < statusEffect.Duration / statusEffect.Period; i++)
             {
                 AffectResource(statusEffect.AffectedResource, statusEffect.AffectedResourceValuePerPeriod);
-                yield return new WaitForSeconds(statusEffect.Period);
+                yield return wait;
             }
         }
 
