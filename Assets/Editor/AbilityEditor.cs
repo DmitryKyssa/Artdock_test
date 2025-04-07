@@ -335,11 +335,11 @@ public class AbilityEditor : EditorWindow
             selectedIndex = EditorGUILayout.Popup("Effect Zone", selectedIndex, allowedValues.Select(v => v.ToString()).ToArray());
             _zone = allowedValues[selectedIndex];
 
-            if(_zone == Zone.AllLocation)
+            if (_zone == Zone.AllLocation)
             {
                 _areaOfEffectRadius = 0f;
                 _customAreaOfEffectPositioningDuration = 0f;
-            } 
+            }
             else if (_zone == Zone.CustomAreaOfEffect)
             {
                 _areaOfEffectRadius = 0f;
@@ -508,7 +508,7 @@ public class AbilityEditor : EditorWindow
 
     private void CreateAbilityAction()
     {
-        if(_abilityName != _abilityForSaving.AbilityName)
+        if (_abilityName != _abilityForSaving.AbilityName)
         {
             _abilityForSaving = CreateInstance<AbilityData>();
         }
@@ -548,6 +548,21 @@ public class AbilityEditor : EditorWindow
                 AssetDatabase.Refresh();
                 _abilityForSaving.SFXData = newSFXData;
             }
+        }
+
+        if (_audioClip != null)
+        {
+            _sfxData = CreateInstance<SFXData>();
+            _sfxData.AudioClip = _audioClip;
+            _sfxData.IsOffsetFromStart = _isOffsetFromStart;
+            _sfxData.OffsetFromStart = _offsetFromStart;
+
+            _sfxData.name = $"{_abilityName}_SFX";
+            string pathSFX = $"Assets/Resources/SFX/{_sfxData.name}.asset";
+            AssetDatabase.CreateAsset(_sfxData, pathSFX);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            _abilityForSaving.SFXData = _sfxData;
         }
 
         for (int i = 0; i < _vfxDatas.Count; i++)
