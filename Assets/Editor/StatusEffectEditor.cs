@@ -1,3 +1,4 @@
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 
@@ -133,6 +134,13 @@ public class StatusEffectEditor : EditorWindow
     {
         if (_statusEffectDataToEdit != null)
         {
+            string path = AssetDatabase.GetAssetPath(_statusEffectDataToEdit);
+            if (string.IsNullOrEmpty(path))
+            {
+                Debug.LogError("Could not find the asset path for selected ability!");
+                return;
+            }
+
             _statusEffectDataToEdit.StatusEffectName = _statusEffectNameToEdit;
             _statusEffectDataToEdit.Description = _descriptionToEdit;
             _statusEffectDataToEdit.TargetType = _targetTypeToEdit;
@@ -142,6 +150,17 @@ public class StatusEffectEditor : EditorWindow
             _statusEffectDataToEdit.Period = _isPeriodicToEdit ? _periodToEdit : _durationToEdit;
             _statusEffectDataToEdit.AffectedResource = _affectedResourceToEdit;
             _statusEffectDataToEdit.AffectedResourceValuePerPeriod = _affectedResourceValuePerPeriodToEdit;
+
+            string newPath = Path.Combine(Path.GetDirectoryName(path), _statusEffectNameToEdit + ".asset");
+            if (path != newPath)
+            {
+                string renameResult = AssetDatabase.RenameAsset(path, _statusEffectNameToEdit);
+                if (!string.IsNullOrEmpty(renameResult))
+                {
+                    Debug.LogError($"Failed to rename asset: {renameResult}");
+                    return;
+                }
+            }
 
             EditorUtility.SetDirty(_statusEffectDataToEdit);
             AssetDatabase.SaveAssets();
